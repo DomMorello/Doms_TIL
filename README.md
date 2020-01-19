@@ -10,6 +10,7 @@ Dom's Today I learned
 
 <details><summary>GIT 생활코딩 강의 (이고잉님)</summary><br>
 
--	[Chapter 1 : GIT CLI 버전관리](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch1.md)</details>
+-	[Chapter 1 : GIT CLI 버전관리](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch1.md)
+-	[Chapter 2 : GIT CLI branch & conflict](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch2.md)</details>
 
 ---

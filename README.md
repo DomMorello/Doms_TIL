@@ -1,17 +1,22 @@
 # Doms_TIL
-Dom's Today I learned
+> Dom's Today I learned
+
+
+소소하게 하루하루 공부하면서 알게 된 새로운 지식들 중 정리해두고 나중에 참고하려고 만든 저장소입니다.
+
+---
+### Categories
+
+* [GIT](#git)
+* [Docker](#docker)
+
 ---
 
-소개
-----
-
-- Today I learned 2020. 1. 19 이후 학습내용 중 정리하고 싶은 것들 정리.<br>
--	`▶` 로 시작하는 소제목을 클릭하여 세부 문서 목록을 펼치거나 접을 수 있다.<br><br>
-
-<details><summary>GIT 생활코딩 강의 (이고잉님)</summary><br>
-
+### git
 -	[Chapter 1 : GIT CLI 버전관리](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch1.md)
 -	[Chapter 2 : GIT CLI branch & conflict](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch2.md)
--	[Chapter 3 : GIT CLI backup & collaboration](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch3.md)</details>
+-	[Chapter 3 : GIT CLI backup & collaboration](https://github.com/DomMorello/Doms_TIL/blob/open_git/open_tutorial_git/git_ch3.md)
+
+### docker
 
 ---

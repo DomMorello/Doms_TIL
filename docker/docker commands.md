@@ -21,6 +21,11 @@ docker stop [options] CONTAINER //컨테이너 중단
 ```bash
 docker rm [options] CONTAINER //컨테이너 삭제
 ```
+##### 컨테이너 접속
+```bash
+docker attach CONTAINER
+docekr attach mycontainer //start를 한 후에 이 명령어를 입력하면 쉘 환경으로 바뀌면서 컨테이너에 접속이 됨.
+```
 ##### 이미지 검색
 ```bash
 docker search IMAGE
@@ -67,3 +72,8 @@ docker exec -it mysql /bin/bash //쉘을 시작할 수 있고
 docker exec -it mysql mysql -uroot  //바로 명령어를 넣어도 된다.
 ```
 exec 명령어를 사용하면 host OS에 mysql 이 설치돼있지 않아도 컨테이너 내부에서 명령어를 사용할 수 있다.
+###### docker 빌드
+```bash
+docker build <옵션> <Dockerfile 경로>
+docker build -t domMorello/hello:v01.2 . //현재 위치에 Dockerfile이 있고 저장소이름,이미지이름,태그 를 달겠다.
+```

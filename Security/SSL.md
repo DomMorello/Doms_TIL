@@ -50,4 +50,6 @@
 ###### 세션 종료
 데이터의 전송이 끝나면 SSL 통신이 끝났음을 서로에게 알려준다. 이 때 통신에서 사용한 대칭키인 세션키를 폐기한다.
 
-##### [출처] (https://12bme.tistory.com/80)
+##### [출처]
+- (https://12bme.tistory.com/80)
+- (https://opentutorials.org/course/228/4894)

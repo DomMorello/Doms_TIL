@@ -26,5 +26,5 @@
 - [tar](https://github.com/DomMorello/Doms_TIL/blob/master/Linux/tar.md)
 - [echo](https://github.com/DomMorello/Doms_TIL/blob/master/Linux/echo.md)
 ### Security
-- [ssl](url)
+- [ssl](https://github.com/DomMorello/Doms_TIL/blob/master/Security/SSL.md)
 ---

@@ -44,7 +44,13 @@ run명령어를 입력하면 이미지가 없을 때 자동으로 다운받으�
 ##### 이미지 삭제
 ```bash
 docker rmi [OPTIONS] IMAGE [IMAGE...] //이미지 삭제하기
+docker rmi $(docker images -f “dangling=true” -q)
 ```
+`docker images -f "dangling=true" -q` 를 하면 non-tagged 즉 <none> 으로 이름이 돼있는 이미지들은 전부 출력한다. 이를 rmi 명령어와 함께 쓰면 태그되지 않은 이름없는 이미지들을 전부 삭제할 수 있다.
+- docker imgae 옵션
+`--filter , -f`	:	Filter output based on conditions provided
+`--quiet , -q`	:	Only show numeric IDs<br>
+
 컨테이너가 실행중인 이미지는 삭제되지 않음.
 ##### 이미지 태그하기
 ```bash
@@ -77,3 +83,5 @@ exec 명령어를 사용하면 host OS에 mysql 이 설치돼있지 않아도 �
 docker build <옵션> <Dockerfile 경로>
 docker build -t domMorello/hello:v01.2 . //현재 위치에 Dockerfile이 있고 저장소이름,이미지이름,태그 를 달겠다.
 ```
+- [출처]
+(https://docs.docker.com/engine/reference/commandline/images/)

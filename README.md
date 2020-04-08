@@ -11,6 +11,7 @@
 * [GIT](#git)
 * [Linux](#linux)
 * [Security](#security)
+* [vim](#vim)
 ---
 
 ### docker
@@ -27,4 +28,8 @@
 - [echo](https://github.com/DomMorello/Doms_TIL/blob/master/Linux/echo.md)
 ### Security
 - [ssl](https://github.com/DomMorello/Doms_TIL/blob/master/Security/SSL.md)
+### vim
+- [fix CRLF problem](url)
+- [set number](url)
+- [to find string](url)
 ---

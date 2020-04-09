@@ -29,7 +29,8 @@
 ### Security
 - [ssl](https://github.com/DomMorello/Doms_TIL/blob/master/Security/SSL.md)
 ### vim
-- [fix CRLF problem](url)
-- [set number](url)
-- [to find string](url)
+- [fix CRLF problem](https://github.com/DomMorello/Doms_TIL/blob/master/vim/fix%20CRLF%20problem.md)
+- [set number](https://github.com/DomMorello/Doms_TIL/blob/master/vim/set%20number.md)
+- [to find string](https://github.com/DomMorello/Doms_TIL/blob/master/vim/to%20find%20string.md)
+- [copy all](url)
 ---

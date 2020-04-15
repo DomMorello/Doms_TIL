@@ -63,5 +63,5 @@
 응용 계층(Application layer)은 응용 프로세스와 직접 관계하여 일반적인 응용 서비스를 수행한다. 일반적인 응용 서비스는 관련된 응용 프로세스들 사이의 전환을 제공한다. 응용 서비스의 예로, 가상 터미널(예를 들어, 텔넷), "Job transfer and Manipulation protocol" (JTM, 표준 ISO/IEC 8832) 등이 있다.
 
 
-- [출처]
-(https://shlee0882.tistory.com/110)
+##### [출처]
+- (https://shlee0882.tistory.com/110)

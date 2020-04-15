@@ -36,6 +36,6 @@
 - [copy all](https://github.com/DomMorello/Doms_TIL/blob/master/vim/copy%20all.md)
 ### Network
 - [TCP/IP](https://github.com/DomMorello/Doms_TIL/blob/master/Network/tcp%20ip.md)
-- [OSI 7 Layers](url)
-- [DHCP](url)
+- [OSI 7 Layers](https://github.com/DomMorello/Doms_TIL/blob/master/Network/OSI%207%20layers.md)
+- [DHCP](https://github.com/DomMorello/Doms_TIL/blob/master/Network/DHCP.md)
 ---

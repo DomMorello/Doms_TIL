@@ -25,4 +25,7 @@
 ### 프로그램의 기본 실행은 Fetch, Decode, Execution
 - Fetch: 메모리상에 존재하는 명령어를 CPU로 가져오는 작업
 - Decode: 가져온 명령어를 CPU가 해석함, 컨트롤 유닛
-- Execution: 해석된 명령어를 CPU가 실행, 보통 ALU가 연산을 담당 
+- Execution: 해석된 명령어를 CPU가 실행, 보통 ALU가 연산을 담당
+
+##### [출처]
+- (https://eunguru.tistory.com/59)

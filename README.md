@@ -7,6 +7,7 @@
 ---
 ### Categories
 
+* [Computer_Architecture](#Computer_Architecture)
 * [Docker](#docker)
 * [GIT](#git)
 * [Linux](#linux)
@@ -14,7 +15,8 @@
 * [vim](#vim)
 * [Network](#network)
 ---
-
+### Computer_Architecture
+- [Computer_hardware](https://github.com/DomMorello/Doms_TIL/blob/master/computer_architecture/computer_hardware.md) 
 ### docker
 - [What is docker?](https://github.com/DomMorello/Doms_TIL/blob/master/docker/what_is_docker.md)
 - [docker commands](https://github.com/DomMorello/Doms_TIL/blob/master/docker/docker%20commands.md)

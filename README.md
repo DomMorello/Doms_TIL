@@ -18,6 +18,7 @@
 ---
 ### Computer_Architecture
 - [Computer_hardware](https://github.com/DomMorello/Doms_TIL/blob/master/computer_architecture/computer_hardware.md) 
+- [CPU 작동원리](https://github.com/DomMorello/Doms_TIL/blob/master/computer_architecture/CPU%EC%9E%91%EB%8F%99%EC%9B%90%EB%A6%AC.md) 
 ### docker
 - [What is docker?](https://github.com/DomMorello/Doms_TIL/blob/master/docker/what_is_docker.md)
 - [docker commands](https://github.com/DomMorello/Doms_TIL/blob/master/docker/docker%20commands.md)

@@ -38,6 +38,7 @@
 - [set number](https://github.com/DomMorello/Doms_TIL/blob/master/vim/set%20number.md)
 - [to find string](https://github.com/DomMorello/Doms_TIL/blob/master/vim/to%20find%20string.md)
 - [copy all](https://github.com/DomMorello/Doms_TIL/blob/master/vim/copy%20all.md)
+- [multi cursor](https://github.com/DomMorello/Doms_TIL/blob/master/vim/multi_cursor.md)
 ### Network
 - [TCP/IP](https://github.com/DomMorello/Doms_TIL/blob/master/Network/tcp%20ip.md)
 - [OSI 7 Layers](https://github.com/DomMorello/Doms_TIL/blob/master/Network/OSI%207%20layers.md)

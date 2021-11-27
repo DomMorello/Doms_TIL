@@ -15,7 +15,7 @@
 
 VanillaJS 를 충분히 공부하지 않고 React를 다루다 보니 JS에 대한 기본기 훈련이 잘 안 돼있다고 생각한다. 그래서 이번 프리코스를 통해서 부족했던 JS 기본 역량을 보완하는 것이 목표 중에 하나이다. **모던 자바스크립트 Deep dive** 와 여러 레퍼런스를 참고해서 잘 몰랐던 내용에 대해서 정리하면서 학습했다.
 
-> new와 생성자 함수
+### 2-1. new와 생성자 함수
 
 ```js
 export default function BaseballGame() {
@@ -38,7 +38,7 @@ new BaseballGame()과 같이 코드를 작성하면
 
 <br>
 
-> this
+### 2-2. this
 
 ```js
 let user = {
@@ -57,7 +57,7 @@ user.sayHi(); // dom
 
 <br>
 
-> forEach 문에서 조건 만족시 break 하기
+### 2-3. forEach 문에서 조건 만족시 break 하기
 
 `forEach` 반복문을 사용해서 검사를 하면서 어떤 조건을 만족하면 반복을 멈추고 `break`나 `return`을 사용해서 나오고 싶을 것이다. 조건을 찾았는데 계속해서 반복문을 찾는 것은 무의미하기 때문이다.
 
@@ -78,29 +78,136 @@ a.forEach((element) => {
 ```
 하지만 `forEach` 구문에서 어떤 조건을 만족했다고 해서 `return`을 해봤자 `forEach` 구문 내부의 콜백함수기 때문에 그 콜백함수만 빠져나오는 것이지 아무 의미가 없다. 위 코드를 실행해보면 1, 2 까지만 출력하고 3, 4는 실행하지 않을 것이라고 생각할 수도 있지만 이는 틀리다.
 
-```
-예외를 던지지 않고는 forEach()를 중간에 멈출 수 없습니다. 중간에 멈춰야 한다면 forEach()가 적절한 방법이 아닐지도 모릅니다.
-
+> 예외를 던지지 않고는 forEach()를 중간에 멈출 수 없습니다. 중간에 멈춰야 한다면 forEach()가 적절한 방법이 아닐지도 모릅니다.<br><br>
 MDN – foreach
-```
+
 MDN 설명에 나와있듯이 `forEach` 에서 중간에 반복을 멈추고 나올 방법은 없다. 조건을 검색하는 반복에서는 이 함수를 사용하는 것이 적절하지 않다.
 
 <br>
 
+### 2-4. 옵셔널 체이닝 연산자
+> ES11(ECMANSript2020)에서 도입된 옵셔널 체이닝 연산자 `?.` 는 좌항의 피연산자가 null 또는 undefined인 경우 undefined를 반환하고, 그렇지 않으면 우항의 프로퍼티 참조를 이어간다.<br><br>
+모던 자바스크립트 Deep Dive p.122
 
+사용자의 입력값인 `userInput` 을 받아오는데 여기서 유효하지 않은 값이 들어오면 `userInput`이 `null`이 되도록 했다. 그런데 return을 할 때 `userInput.join("")` 을 하는데 여기서 `userInput`이 null 이면 에러가 나는 상황에 봉착했다.
 
+그래서 return을 하기 전에 null 검사를 해야 하는 상황인데 여기서 옵셔널 체이닝 연산자를 쓰지 않으면 다음과 같이 했었어야 했다.
 
+```js
+export default function getUserInput() {
+  let userInput = null;
+  const userInputArray = {
+    ...
+    userInput = userInputArray;
+  }
+  return userInput && userInput.join("");
+  //여기서 userInput이 null일 수도 있기 때문에 && 연산자를 통해 검사
+}
+```
+그런데 옵셔널 체이닝 연산자를 이용하면 다음과 같이 수정할 수 있다.
 
+```js
+export default function getUserInput() {
+  let userInput = null;
+  const userInputArray = {
+    ...
+    userInput = userInputArray;
+  }
+  return userInput?.join("");
+  //옵셔널 체이닝 연산자 사용
+}
+```
+위 코드와 같이 **옵셔널 체이닝 연산자**를 사용하면 userInput이 null이거나 undefined이면 undefined를 반환하고 아니라면 우항의 프로퍼티를 참조한다.
+
+<br>
 
 ## 3. 어떤 구조로 프로그래밍 해야 할까
 
-입력을 받고 랜덤한 컴퓨터 input을 만든 후에 play 메소드를 생성자 함수 내부에서 실행하려고 했는데 그렇게 하려면 play 메소드에 들어갈 두 개의 인자를 미리 구해야 했다. 그런데 이벤트 리스너로 값을 구한 다음에 파라미터로 넣어야 하는데 이벤트가 발생하는 시점에 userInput을 구하고 computerInput을 만들어내고 게임로직을 실행해햐 한다. 
+### 3-1. 첫 설계의 착오
 
-처음에 구현할 기능 순서대로 목록을 작성했는데 개발을 하다 보니 로직이 잘못 됐다는 것을 깨달았다. 사용자 입력을 받는 경우를 먼저 생각했는데 그 이벤트가 발생할 때마다 그 후에 종속적으로 computerInput을 랜덤생성하면 계속해서 computerInput이 바뀌기 때문에 computerInput을 먼저 생성해야 한다. 그런데 정답을 맞춘 경우 다시 computerInput을 만들어야 하기 때문에 반복되는 루프를 잘 생각해야 했다. 
+코드를 짤 때 항상 필요없는 행동을 최소화하기 위해서 노력한다. 그래서 이 게임의 시작은 항상 사용자의 입력이 있는 순간 시작된다는 사실을 인지하고 사용자의 입력을 받는 것을 최우선으로 코드를 짜기 시작했다.
 
+그런데 처음에 구현할 기능 순서대로 목록을 작성했는데 개발을 하다 보니 로직이 잘못 됐다는 것을 깨달았다. 사용자 입력이 있을 때 컴퓨터의 입력을 생성하고 비교하는 게임 로직을 실행하려고 했는데 사용자 입력을 받는 이벤트가 발생할 때마다 그 후에 종속적으로 computerInput을 랜덤생성하면 계속해서 computerInput이 사용자 입력이 있을 때마다 바뀌기 때문에 정답을 맞출 가능성이 현저히 떨어지고 게임의 본질적인 기능을 하지 못한다는 사실을 알았다.
 
+그래서 처음 설계한 로직을 수정하여 컴퓨터의 입력값이 먼저 있는 상태에서 사용자의 입력을 받고 비교하여 게임을 진행하는 로직이 다음으로 오도록 수정했다.
 
-### 3.1. 입력 예외 검사 및 처리 : Domain vs View
+> playGame.js
+```js
+export default function playGame(play) {
+  const $userSubmitButton = document.querySelector("#submit");
+  const computerInput = getComputerInput();
+
+  $userSubmitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    const userInput = getUserInput();
+    console.log("test: ", computerInput, userInput);
+  });
+}
+```
+위 코드와 같이 컴퓨터 입력 값을 먼저 생성한 후에 사용자의 입력값을 받고 그 두 개의 입력값을 비교하여 게임 로직을 실행하는 순서로 수정했다.
+
+<br>
+
+### 3-2. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다
+
+원래는 이렇게 구조를 생각했다. 기능별로 함수를 나눠야 하기 때문에 `getUserInput` 함수에서는 userInput의 값을 검사해서 유효하면 얻어오도록 하려고 했다. 그런데 이벤트가 발생하는 시점에 콜백함수를 실행하는데 위와 같이 코드를 짜면 userInput에는 항상 null값만 들어온다. 왜냐하면 다른 곳에서 이 함수를 호출해서 return 값을 받아서 사용하려고 했는데 함수를 실행하는 시점에는 `userInput`에 null값이 들어가있기 때문이다. 즉, 야구게임의 경우 사용자의 입력을 받는 순간 그 콜백함수에서 모든 게임 로직이 연속되게 실행돼야 한다는 것이다. 이벤트가 발생했을 때마다 새로운 값을 return 받으려고 했지만 구조적으로 불가능하다는 사실을 알아서 다음과 같이 구조를 바꿨다.
+
+> getUserInput.js
+```js
+export default function getUserInput() {
+  const $userSubmitButton = document.querySelector("#submit");
+
+  $userSubmitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    const userInputArray = document
+      .querySelector("#user-input")
+      .value.split("")
+      .map((elem) => +elem);
+    if (alertErrorMessage(isValidInput(userInputArray))) {
+      compareComputerUserInput(getComputerInput(), userInputArray); //콜백함수 안에서 다음 게임 로직을 연속해서 실행
+    }
+  });
+}
+```
+위 코드를 보면 userInput 값을 반환하는 것이 아니라 이 함수 안에서 이벤트가 발생하면 입력값의 유효성을 검사한 후에 게임로직을 이 콜백함수 안에서 연속해서 실행하는 것이다. 
+
+게임이 진행되는 방식이 이벤트의 발생에 따라서 결과값을 보여줘야 하기 때문에 이렇게 하는 것이 옳은 구조라고 생각해서 바꾸게 되었다. 
+
+하지만 이런 식으로 구조를 만들면 `getUserInput` 이라는 함수 안에서 게임로직까지 실행되므로 한 기능을 가진 함수를 실행하는 원칙에 어긋나고 유지보수하기 어려운 코드가 될 것이다.
+
+그래서 이벤트리스너를 게임을 시작하는 로직에 모아두고 그 안에서 userInput을 받아오면 한 가지 기능을 하는 함수를 만들 수 있다는 생각이 들었다.
+
+> playGame.js
+```js
+export default function playGame(play) {
+  const $userSubmitButton = document.querySelector("#submit");
+
+  $userSubmitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    const userInput = getUserInput();
+    // userInput만 받아오는 한 가지 기능을 하는 함수
+  });
+}
+```
+> getUserInput.js
+```js
+export default function getUserInput() {
+  let userInput = null;
+  const userInputArray = document
+    .querySelector("#user-input")
+    .value.split("")
+    .map((elem) => +elem);
+  if (alertErrorMessage(isValidInput(userInputArray))) {
+    userInput = userInputArray;
+  }
+  return userInput;
+}
+```
+위와 같이 `playGame` 함수에서 전체적인 이벤트리스너 구조를 만들어 놓고 그 콜백함수 안에서 userInput을 받아오면 `getUserInput` 함수는 userInput을 받아오는 한 가지 기능을 하는 함수로 탈바꿈이 가능했다. 이렇게 구조를 바꾸니까 한 가지 기능을 가진 함수를 만들 수 있었고 구조적으로도 충분히 가능한 코드를 만들 수 있었다.
+
+<br>
+
+### 3-3. 
 
 입력 예외를 어느 시점, 어디에서 검사하고 예외를 호출해야 하는가? View or Domain? View에서 입력 예외를 검사 및 처리하는 로직이 Domain 내부 로직을 과도하게 관여 및 침범하는 것이 아닌가?
 

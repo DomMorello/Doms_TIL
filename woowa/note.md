@@ -121,7 +121,7 @@ export default function getUserInput() {
 
 <br>
 
-## 3. 어떤 구조로 프로그래밍 해야 할까
+## 3. 구현 중에 했던 고민들
 
 ### 3-1. 첫 설계의 착오
 
@@ -209,290 +209,42 @@ export default function getUserInput() {
 
 ### 3-3. 
 
-입력 예외를 어느 시점, 어디에서 검사하고 예외를 호출해야 하는가? View or Domain? View에서 입력 예외를 검사 및 처리하는 로직이 Domain 내부 로직을 과도하게 관여 및 침범하는 것이 아닌가?
-
-BaseballNumbers 도메인 객체는 중복되지 않은 1~9 사이의 임의의 3자리 수로 구성되는 생성 규칙을 가지고 있다. View에서 별도로 입력값 예외를 검사하지 않더라도, 잘못된 입력값이 들어온다면 도메인 객체 생성시 예외가 발생하긴 한다.
-
-그렇다면 View에서는 입력값에 대한 예외 검증 및 처리가 불필요한가? 프로그램 사이즈가 작더라도, View는 View대로 Domain은 Domain대로 예외 검사 및 처리를 모두 잘 수행해야 좋은 프로그램이라고 생각한다.
-
-예를 들어, Spring으로 웹 어플리케이션에서 회원가입 기능을 구현한다고 해보자. 회원 정보가 담기는 User 도메인 객체에 잘못된 패턴의 입력값(이메일, 비밀번호 등)이 들어오면 @Valid를 통해 BindingException 예외가 발생한다. @ControllerAdvice가 적합한 ExceptionHandler를 호출하여 예외를 처리한다.
-
-이처럼 도메인 단에서 예외를 검사 및 처리하지만, 정규식 및 HTML 기능을 이용해 일차적으로 프론트엔드 단(View 페이지)에서 입력값에 대한 유효성 검사(대소문자 및 특수문자 포함 여부 등의 패턴 검사 혹은 공백 검사 등)를 진행함으로써 예외를 꼼꼼하게 처리할 수 있다.
-
-예외 검증 및 처리를 어느 수준으로 할지는 전적으로 개발자에게 달려있지만, Domain과 View 모두 꼼꼼하게 예외를 처리해주는 것이 좋은 개발 습관이라고 생각한다.
-
-> InputView.java
-
-```java
-private void validateInputBaseballNumbers(String inputBaseballNumbers) {
-    if (inputBaseballNumbers.length() != VALID_INPUT_BASEBALL_NUMBER_COUNTS) {
-        throw new IllegalArgumentException();
-    }
-    boolean isDuplicated = inputBaseballNumbers.chars()
-            .filter(number -> MINIMUM_BASEBALL_NUMBER <= number && number <= MAXIMUM_BASEBALL_NUMBER)
-            .distinct()
-            .count() != VALID_INPUT_BASEBALL_NUMBER_COUNTS;
-    if (isDuplicated) {
-        throw new IllegalArgumentException();
-    }
-}
-```
+## 4. git
 
-View에서 입력값 예외 검사를 진행하기 위해서는, BaseballNumbers라는 객체의 생성 조건(중복되지 않은 1-9 사이의 임의의 수 3자리)을 이용하게 된다. 처음에는 이러한 View의 예외 처리가, Domain 객체의 내부 정보 및 자율성을 과도하게 침해하는 것이 아닌지 의문이 들었다.
-
-하지만 View에서 입력 예외 검사 및 처리를 하기 위해서는, Domain 객체의 내부 정보 및 로직(객체 생성에 사용되는 데이터의 형태 등 규칙)이 View에 필연적으로 포함될 수 밖에 없다고 결론을 내렸다.
-
-### 3.2. 입력 예외 검사 및 처리 : 재입력 여부
-
-입력 예외가 발생하면 단순히 예외를 호출하는 것으로 충분한가? View에서 try-catch를 통해 예외를 처리하고, 올바른 값을 다시 재입력받도록 코드를 짜야하는가?
-
-대부분의 웹 어플리케이션은 로그인 입력값이 잘못되었다고 웹 앱이 종료되지 않고, 오히려 안내 문구와 함께 회원 정보를 재입력할 수 있도록 유저 편의를 봐준다.
-
-입력값 예외가 발생했을 때, 별도의 처리 없이 프로그램이 종료되게 할지 혹은 경고 문구와 함께 다시 재입력을 받도록 할지는 ***3.1.*** 절과 마찬가지로 개발자에게 달려있다.
-
-> InputView.java
-
-```java
-public List<Integer> inputBaseballNumbers() {
-    System.out.print(INPUT_BASEBALL_NUMBERS_MESSAGE);
-    String inputBaseballNumbers = scanner.nextLine();
-    while (!isValidInputBaseballNumbers(inputBaseballNumbers)) {
-        inputBaseballNumbers = scanner.nextLine();
-    }
-    return inputBaseballNumbers.chars()
-            .map(numberCharacter -> numberCharacter - CHAR_TO_INT_CONVERTER_ASCII_CHARACTER)
-            .boxed()
-            .collect(Collectors.toList());
-}
-
-private boolean isValidInputBaseballNumbers(String inputBaseballNumbers) {
-    try {
-        validateInputBaseballNumbers(inputBaseballNumbers);
-        return true;
-    } catch (IllegalArgumentException e) {
-        System.out.print(WRONG_INPUT_MESSAGE);
-        return false;
-    }
-}
-
-private void validateInputBaseballNumbers(String inputBaseballNumbers) {
-    if (inputBaseballNumbers.length() != VALID_INPUT_BASEBALL_NUMBER_COUNTS) {
-        throw new IllegalArgumentException();
-    }
-    boolean isDuplicated = inputBaseballNumbers.chars()
-            .filter(number -> MINIMUM_BASEBALL_NUMBER <= number && number <= MAXIMUM_BASEBALL_NUMBER)
-            .distinct()
-            .count() != VALID_INPUT_BASEBALL_NUMBER_COUNTS;
-    if (isDuplicated) {
-        throw new IllegalArgumentException();
-    }
-}
-```
-
-숫자 야구 미션 프로그래밍 요구사항에 예외가 발생한 경우 재입력을 받게 하라는 별도의 명시 사항은 없었다. 하지만 유저 편의성을 위해 입력 예외를 try-catch로 잡고 while을 통해 재입력을 받을 수 있도록 했다.
-
-### 3.3. 입력 예외 검사 및 처리 : Domain 예외
-
-발생 가능한 모든 입력 예외 케이스를 View에서 try-catch로 완벽하게 처리했다면, 입력값을 활용하는 비즈니스 로직에서 발생 가능한 예외는 try-catch로 처리하지 않아도 되는가?
-
-> BaseballNumbers.java
-
-```java
-public static BaseballNumbers generateInputBaseballNumbers(List<Integer> inputBaseballNumbers) {
-    validateDuplication(inputBaseballNumbers);
-    List<BaseballNumber> baseballNumbers = inputBaseballNumbers.stream()
-            .map(BaseballNumber::valueOf)
-            .collect(Collectors.toList());
-    return new BaseballNumbers(baseballNumbers);
-}
-
-private static void validateDuplication(List<Integer> inputBaseballNumbers) {
-    int distinctCounts = (int) inputBaseballNumbers.stream()
-            .distinct()
-            .count();
-    if (distinctCounts != NECESSARY_BASEBALL_NUMBER_COUNTS) {
-        throw new IllegalArgumentException();
-    }
-}
-```
-
-BaseballNumbers 객체는 정수 리스트를 파라미터로 받아 생성할 수 있다. 이 때 정수 리스트가 중복되지 않은 1~9 사이의 임의의 수 3개로 구성되어 있지 않다면 예외가 발생한다.
-
-> Application.java
-
-```java
-BaseballNumbers userBaseballNumbers =
-          BaseballNumbers.generateInputBaseballNumbers(inputView.inputBaseballNumbers());
-```
-
-메인 어플리케이션에서 유저가 입력한 값을 통해 BaseballNumbers 객체를 생성한다. InputView에서 발생 가능한 모든 입력 예외 케이스를 완벽하게 처리하고 있다면, ``inputBaseballNumbers()`` 메서드는 중복되지 않은 1~9 사이의 임의의 수 3개 리스트를 항상 정상적으로 반환한다. 따라서 BaseballNumbers 객체를 생성할 때 중복 예외가 절대 발생하지 않을 것이다.
-
-그렇다면 해당 비즈니스 로직 부분은 try-catch로 예외를 명시적으로 처리할 필요가 없을까?
-
-Spring 어플리케이션은 @ControllerAdvice 및 Logger를 통해 try-catch 없이 발생한 예외 처리 및 로그 기록을 자동화할 수 있다.
-
-반면 숫자 야구같은 콘솔 게임 프로그램같은 현재의 경우는, 결국 예외 처리를 어느 수준으로 할지에 대한 문제로 귀결되며 전적으로 개발자에게 달려있다.
-
-> Application.java
-
-```java
-public class Application {
-    public static void main(String[] args) {
-        final Scanner scanner = new Scanner(System.in);
-        InputView inputView = new InputView(scanner);
-        BaseballGameMachine baseballGameMachine =
-                new BaseballGameMachine(BaseballNumbers.generateRandomBaseballNumbers());
-        GameState gameState = GameState.initiate();
-        while (gameState.isAbleToPlay()) {
-            try {
-                baseballGameMachine = baseballGameMachine.prepareNextTry(gameState);
-                BaseballNumbers userBaseballNumbers =
-                        BaseballNumbers.generateInputBaseballNumbers(inputView.inputBaseballNumbers());
-                GameResult gameResult = baseballGameMachine.play(userBaseballNumbers);
-                OutputView.outputGameResult(gameResult);
-                gameState = GameState.findGameState(inputView.inputGameState(gameResult));
-            } catch (RuntimeException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-        scanner.close();
-    }
-}
-```
-
-굳이 도메인의 비즈니스 로직에서 발생할 수 있는 예외를 처리하고자 한다면, Application의 메인 코드에서 try-catch를 위처럼 삽입할 수 있겠다.
-
-다만 Indent(depth)가 2로 증가하고, 가독성이 나쁘기 때문에 맘에 드는 구조는 아니다. 어차피 RuntimeException은 Unchecked Exception이기 때문에, 상황과 필요성을 고려하여 처리하면 될 것 같다. 나는 도메인의 비즈니스 로직에 대한 예외 처리는 하지 않는 것으로 결정했다.
-
-> BaseballNumberDuplicationException.java
-
-```java
-public class BaseballNumberDuplicationException extends RuntimeException {
-    private static final String ERROR_MESSAGE = "숫자가 중복되었습니다. (%d)";
-
-    public BaseballNumberDuplicationException(int baseballNumber) {
-        super(String.format(ERROR_MESSAGE, baseballNumber));
-    }
-}
-```
-
-View는 View대로 Domain은 Domain대로 예외 처리와 검증이 필요하다고 생각하지만, 현재 규모의 프로그램에서는 View에서 예외 처리를 제대로 하는 것과 Domain 관련 커스텀 예외 선언만으로도 충분하다고 생각한다.
-
-### 3.4. try-catch Recursion vs While Loop
-
-> InputView.java
-
-```java
-public List<Integer> inputBaseballNumbers() {
-    System.out.print(INPUT_BASEBALL_NUMBERS_MESSAGE);
-    String inputBaseballNumbers = scanner.nextLine();
-    while (!isValidInputBaseballNumbers(inputBaseballNumbers)) {
-        inputBaseballNumbers = scanner.nextLine();
-    }
-    return inputBaseballNumbers.chars()
-            .map(numberCharacter -> numberCharacter - CHAR_TO_INT_CONVERTER_ASCII_CHARACTER)
-            .boxed()
-            .collect(Collectors.toList());
-}
-
-private boolean isValidInputBaseballNumbers(String inputBaseballNumbers) {
-    try {
-        validateInputBaseballNumbers(inputBaseballNumbers);
-        return true;
-    } catch (IllegalArgumentException e) {
-        System.out.print(WRONG_INPUT_MESSAGE);
-        return false;
-    }
-}
-```
-
-현재는 입력 예외가 발생하면 try-catch로 잡고, while 반복문을 통해 재입력을 받는다.
-
-> InputView.java
-
-```java
-public List<Integer> inputBaseballNumbers() {
-    System.out.print(INPUT_BASEBALL_NUMBERS_MESSAGE);
-    String inputBaseballNumbers = getInputBaseballNumbers();
-    return inputBaseballNumbers.chars()
-            .map(numberCharacter -> numberCharacter - CHAR_TO_INT_CONVERTER_ASCII_CHARACTER)
-            .boxed()
-            .collect(Collectors.toList());
-}
-
-private String getInputBaseballNumbers() {
-    try {
-        String inputBaseballNumbers = scanner.nextLine();
-        validateInputBaseballNumbers(inputBaseballNumbers);
-        return inputBaseballNumbers;
-    } catch (IllegalArgumentException e) {
-        return getInputBaseballNumbers();
-    }
-}
-```
-
-예외가 발생했을 때 catch에서 메서드를 재귀 호출하면, 짧은 코드로 while 반복문 효과를 낼 수 있다.
-
-그러나 여러 레퍼런스를 참고해보니, 예외를 통해 프로그램의 정상적인 흐름을 제어하는 것은 나쁜 프로그래밍 습관이라고 한다. 또한 재귀 호출의 특성상, 수 많은 잘못된 입력값 공격이 들어오면 StackOverFlowErrorr가 발생할 수 있다. 따라서 반복이 필요하다면 while을 사용하자.
-
-+ 추가 (2020/12/03)
-
-[관련 아티클](https://woowacourse.github.io/javable/2020-04-30/iteration_vs_recursion)에 내가 고민했던 내용이 명쾌하게 정리되어 있었다.
-
-* 재귀 장점
-  * 반복 구조를 단순한 로직으로 구현이 가능함.
-  * 변수와 코드의 길이가 줄어 가독성이 상승함.
-  * 컴파일러가 꼬리 재귀 최적화를 지원하면 재귀의 단점(메모리, 성능)을 보완할 수 있음.
-* 재귀 단점
-  * 콜 스택이 쌓여서 StackOverFlow 발생할 수 있음.
-  * 스택을 구성하고 해제하는 과정에서 반복문보다 오버헤드가 들기 때문에 성능이 떨어짐.
-* 결론
-  * 성능이 중요한 과거에는 반복문이 당연했지만, 하드웨어가 발전한 오늘 날에는 성능보다 협업이 강조되는 만큼 가독성(재귀)를 고려할 필요가 있다.
-    * 특히 컴파일러가 꼬리 재귀의 최적화를 지원해주면 성능까지 얻을 수 있다.
-  * 그러나 StackOverFlow를 무시할 수 없으니, 이왕이면 깊이가 예측가능한 경우에 사용하는 것이 안전하고 현명하다.
-
-꼬리 재귀에 대한 개념은 어렵지 않으니 해당 원문 링크를 참고하길 바란다. 궁금해서 찾아봤는데, [Java 8은 꼬리 재귀 최적화를 지원하지 않는다고 한다.](https://stackoverflow.com/questions/22866491/does-java-8-have-tail-call-optimization)
-
-<br>
-
-## 4. equals 오버라이드
-
-코드를 짜면서 생각나는 김에 Effective Java의 **equals는 일반 규약을 지켜 재정의하라** 및 **equals를 재정의하려거든 hashCode도 재정의하라** 챕터들을 복습했다.
-
-> BaseballNumber.java
-
-```java
-public class BaseballNumber {
-    public static final int RANGE_MINIMUM = 1;
-    public static final int RANGE_MAXIMUM = 9;
-    private static final Map<Integer, BaseballNumber> CACHE = new HashMap<>();
-
-    private final int baseballNumber;
-
-    private BaseballNumber(int baseballNumber) {
-        this.baseballNumber = baseballNumber;
-    }
-
-    public static BaseballNumber valueOf(int baseballNumber) {
-        validateBaseballNumberRange(baseballNumber);
-        return CACHE.computeIfAbsent(baseballNumber, BaseballNumber::new);
-    }
-
-    private static void validateBaseballNumberRange(int baseballNumber) {
-        if (baseballNumber < RANGE_MINIMUM || baseballNumber > RANGE_MAXIMUM) {
-            throw new IllegalArgumentException();
-        }
-    }
-}
-```
-
-BaseballNumber 객체는 캐시를 사용하기 때문에 1번 ~ 9번 등 총 9개의 객체만 존재한다. 프로그램 로직 중, 두 개의 BaseballNumber 리스트의 원소가 동일한지 여부를 체크하여 스트라이크와 볼 개수를 계산한다.
-
-처음에는 내부 int 값을 비교하기 위해 ``eqauls()``를 오버라이드 했지만, 그럴 필요가 없음을 느끼고 상속받은 Object의 ``equals()``를 그대로 사용하게 되었다.
-
-``equals()`` 메서드는 같은 객체의 참조 여부는 중요하지 않고 객체가 가지는 값이 논리적으로 같은지 확인이 필요할 때 오버라이드를 한다. 특히 값(Value) 클래스에서 Map의 키나 Set의 요소로 객체를 저장하려고 사용하려면, 같은 값의 객체가 이미 있는지 비교해야 하기 때문에 ``equals()`` 및 ``hashCode()``의 오버라이드가 필수이다.
-
-BaseballNumber는 싱글톤과 유사하게 각 값(1 ~ 9) 당 최대 하나의 객체만 존재하도록 인스턴스를 제어하고 있다. 사실상 논리적인 일치(값 비교)와 객체 참조 일치가 동일한 의미이기 때문에 == 연산을 통해 레퍼런스 주소값을 비교하는 Object의 ``equals()``가 논리적인 ``equals()``를 수행한다.
+### 4-1. git reset --hard 실수
+여러 디렉토리가 있는 프로젝트를 진행하는 중에 현재 디렉토리의 위치를 모르고 `git add .` 명령어를 통해서 commit 을 하는 경우가 있다. 그런데 add할 파일들이 여러 개가 있는데 현재 디렉토리의 위치가 하위 디렉토리에 있다는 것을 모르고 전체가 다 add된 줄 알고 진행을 해버렸다. 
+
+결국엔 commit에 포함돼야 할 상위 디렉토리의 파일들을 제외하고 commit을 해버려서 기능 단위의 커밋 로그 작성이 실패한 적이 있었다.
+
+그래서 commit을 취소하는 방법에 대해서 조사를 하다가 **git reset** 명령어에 대해서 공부하게 됐다.
+
+`git reset` 과 `git checkout`의 차이는 reset은 브랜치를 바꾸지 않고 현재 가리키고 있는 헤드의 위치를 바꾸는 것이다. 이와는 다르게 checkout은 브랜치 자체를 바꿔버린다.
+
+![image](./gitResetSoft.png)
+
+위 그림을 이해하기 위한 설명을 하자면 아래 쪽에 있는 HEAD, Index, Working Directory를 각각 설명하자면,
+
+> **HEAD**는 현재 브랜치가 가리키는 포인터이다. 가장 최근에 commit한 내용을 가리키고 있다.<br>
+**Index**는 바로 다음에 커밋할 것들이다. 즉, staging area를 말한다.즉, `git add` 까지 한 파일들을 말한다.<br>
+**Working Directory**는 현재 로컬에서 가장 최근까지 수정한 코드들을 담고 있는 파일들이다. <br>
+
+위 그림에서 보다시피 `git reset --soft HEAD~` 를 하면 브랜치의 헤드의 위치만 원하는 commit 으로 되돌린다. 그림 아래 쪽에 Index와 Working Directory 를 보면 변화가 없이 그대로 있고 HEAD 부분만 이전의 commit으로 돌아간 것을 확인할 수 있다.
+
+![image](./gitResetMixed.png)
+
+그런데 옵션을 주지 않으면 기본값을 `git reset --mixed HEAD~` 명령어를 실행하게 된다. 
+
+위 그림에서 보면 헤드가 이전 커밋으로 이동하는 것 뿐 아니라 `soft`옵션과 다르게 Index 가 이전 커밋 내용으로 변경되는 것이다. 이 말은 staging area를 비운다는 것이다. 즉, `git add`, `git commit` 한 행동까지 되돌린다는 것이다. 하지만 working directory가 그대로 있다는 얘기는 파일이 수정된 것은 로컬에 그대로 남아있다는 것을 의미한다.
+
+그렇다면 내가 실수한 `git reset --hard` 는 무엇일까?
+
+![image](./gitResetHard.png)
+
+위 그림을 보면 Working Directory까지 그 전 커밋 내용으로 변경된 것을 볼 수 있다. 즉, 내가 작업하고 있는 로컬 환경에서도 과거로 이동하는 것이다. 그런데 이 명령어는 매우 위험하다. git에서 실제로 데이터를 삭제해버리는 경우는 별로 없는데 이 경우가 데이터를 삭제하는 경우 중의 하나이다. 
+
+나는 마지막 커밋을 수정하기 위해서 `--hard`옵션을 줬는데 이렇게 했더니 최근에 수정한 코드들이 전부 날아가 버렸다. 
+
+이제 `git reset` 명령어에 대해서 다시 공부를 해서 그런 실수를 하는 일이 없도록 했다.
 
 <br>
 
@@ -613,9 +365,10 @@ BaseballGameMachine baseballGameMachine = BaseballGameMachine.initiate();
 
 ## References
 
-* [how to call recursively a method in a try-catch block](https://stackoverflow.com/questions/21783914/how-to-call-recursively-a-method-in-a-try-catch-block)
-* [When to use mutable objects?](https://stackoverflow.com/questions/44772949/when-to-use-mutable-objects)
-* [(이펙티브 자바 3판) 3장 - 모든 객체의 공통 메서드, equals는 일반 규약을 지켜 재정의하라](https://perfectacle.github.io/2018/11/26/effective-java-ch03-item10-equals-method/)
+* 모던 자바스크립트 Deep Dive (이웅모 저)
+* [모던 자바스크립트 튜토리얼](https://ko.javascript.info/)
+* [git reset 자세히 알기](https://git-scm.com/book/ko/v2/Git-%EB%8F%84%EA%B5%AC-Reset-%EB%AA%85%ED%99%95%ED%9E%88-%EC%95%8C%EA%B3%A0-%EA%B0%80%EA%B8%B0)
+
 * [8) equals 메서드를 오버라이딩 할 때는 보편적 계약을 따르자](http://egloos.zum.com/hahaha333/v/3906967)
 * [[Java] 인기있는 Unit Test 네이밍 규칙](https://hilucky.tistory.com/216)
 * [JUnit5 @Nested, @DisplayName 활용](https://www.freeism.co.kr/wp/archives/1061)

@@ -207,7 +207,7 @@ export default function getUserInput() {
 
 <br>
 
-### 3-3. 
+### 3-3.
 
 ## 4. git
 

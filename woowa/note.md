@@ -66,8 +66,7 @@ const a = [1,2,3,4];
 
 a.forEach((element) => {
     console.log(element);
-    if (element === 2)
-        return ;
+    if (element === 2) return;
 });
 
 //outut
@@ -79,7 +78,7 @@ a.forEach((element) => {
 하지만 `forEach` 구문에서 어떤 조건을 만족했다고 해서 `return`을 해봤자 `forEach` 구문 내부의 콜백함수기 때문에 그 콜백함수만 빠져나오는 것이지 아무 의미가 없다. 위 코드를 실행해보면 1, 2 까지만 출력하고 3, 4는 실행하지 않을 것이라고 생각할 수도 있지만 이는 틀리다.
 
 > 예외를 던지지 않고는 forEach()를 중간에 멈출 수 없습니다. 중간에 멈춰야 한다면 forEach()가 적절한 방법이 아닐지도 모릅니다.<br><br>
-MDN – foreach
+MDN – forEach
 
 MDN 설명에 나와있듯이 `forEach` 에서 중간에 반복을 멈추고 나올 방법은 없다. 조건을 검색하는 반복에서는 이 함수를 사용하는 것이 적절하지 않다.
 
@@ -207,7 +206,126 @@ export default function getUserInput() {
 
 <br>
 
-### 3-3.
+### 3-3. 상수는 어디에 위치해야 할까?
+기능을 구현하다 보면 절대 변하지 않을 값들이 있고 이를 하드코딩하기 보다는 의미있는 이름을 지어줘서 상수에 할당해서 사용하는 것이 더 좋을 것이라고 생각했다. 
+
+> getComputerInput.js
+```js
+const COMPUTER_INPUT_LENGTH = 3;
+
+export default function getComputerInput() {
+  const computerInput = new Set();
+
+  while (computerInput.size < COMPUTER_INPUT_LENGTH) {
+    computerInput.add(window.MissionUtils.Random.pickNumberInRange(1, 9));
+  }
+  return [...computerInput].join("");
+}
+```
+위 코드를 보면 이 프로그램에서 컴퓨터 입력값은 무조건 3자리여야 한다. 그래서 `COMPUTER_INPUT_LENGTH`를 3 으로 정해놓고 사용을 했다. 연관있는 변수, 상수, 함수들은 전부 한 파일에 있는 것이 좋을 것이라고 생각해서 처음에 `getComputerInput.js` 파일 안에 상수를 위치시켜놨다.
+
+그런데 기능 구현을 계속 하다보니까 사용자의 입력값의 길이를 사용해야 하는 경우가 있었다. 그래서 상수의 이름이 적절치 않다는 것을 깨닫고 `COMPUTER_INPUT_LENGTH` 에서 `INPUT_LENGTH`로 수정했다. 이 프로그램에서 컴퓨터, 사용자 모두의 입력값의 길이는 세 자리여야 하기 때문이다.
+
+그리고 또 하나 문제가 `getComputerInput` 함수에서만 사용될 것 같았던 저 상수가 다른 파일의 다른 함수에서도 필요하다는 것을 알게 되었고 그래서 위 코드에서 상수부분에 **export** 를 추가해줬다. 이렇게 하면 다른 파일에서 **import** 해서 사용할 수 있기 때문이다.
+
+그런데 이렇게 상수를 한 파일에 종속시키고 외부에서 필요하면 export 하고 import하는 과정을 반복하다보니 이 상수가 도대체 어디에 종속돼야 하고 어디에 연관성이 깊은 것인지를 알기가 어려워지는 것 같았다.
+
+그래서 만약에 한 파일에서만 사용되는 상수가 아니고 **여러 파일에서 반복적으로 사용되는 상수라면** 독립적인 하나의 파일 안에 상수들만 모아놓는 것이 더 효율적일 것이라고 생각했다. 
+
+한 파일안에서만 사용되는 상수라면 그 파일에 상수를 위치시키는 것이 더 좋겠지만 여러 파일에서 사용되는 상수라면 **독립적인 공간**에 두는 것이 export, import 관계도 더 명확해지고 논리적이라고 생각했다. 또한 다른 개발자가 내 코드를 볼 때 contant 라는 디렉토리 안에 상수를 모아놓으면 이 상수들은 여러 곳에서 사용된다는 것을 더 쉽게 유추할 수 있지 않을까라는 생각을 했다.
+
+하지만 1주차 프로그램은 아주 작은 프로그램이라서 더 효율적인 것처럼 보이지만 큰 프로그램의 경우에는 어떤 식으로 상수를 위치시키는지에 대해서는 아직 확신이 없다. 앞으로도 계속 생각해볼 문제라고 생각한다.
+
+### 3-4. HTML 태그는 어떤 방식으로 생성해야 할까?
+
+
+
+> showResult.js
+```js
+function renderAskRegame() {
+  const $resultDivElement = document.getElementById("result");
+  const $newDivElement = document.createElement("div");
+  const $newSpanElement = document.createElement("span");
+  const $newButtonElement = document.createElement("button");
+  $newDivElement.innerText = "🎉정답을 맞추셨습니다!🎉";
+  $newDivElement.setAttribute("style", "font-weight: bold");
+  $newSpanElement.innerText = "게임을 새로 시작하시겠습니까?";
+  $newButtonElement.innerText = "게임 재시작";
+  $newButtonElement.setAttribute("id", "game-restart-button");
+  $resultDivElement.append($newDivElement);
+  $resultDivElement.append($newSpanElement);
+  $resultDivElement.append($newButtonElement);
+}
+```
+
+<br>
+
+### 3-5. call by reference 를 활용하는 것은 어떨까?
+기능을 구현하다가 정답을 맞추고 `게임 재시작` 버튼을 누르면 **computerInput**을 세 자리 랜덤한 숫자로 다시 생성해야 했다.
+
+> gameEventHandler.js
+```js
+export default function gameEventHandler(play) {
+  const $userSubmitButton = document.getElementById("submit");
+  const $userResultDiv = document.getElementById("result");
+  let computerInput = getComputerInput();
+
+  $userSubmitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    const userInput = getUserInput();
+    if (userInput) {
+      if (showResult(play(computerInput, userInput)) === ANSWER) {
+        computerInput = getComputerInput();
+        //게임 정답을 맞추면 computerInput을 다시 생성한다.
+      }
+    }
+  });
+}
+```
+위 코드에서처럼 정답을 맞추면 `computerInput`을 갱신하고 다시 게임을 처음부터 진행하도록 하려고 했는데 위 코드대로 하면 depth가 3이 돼버려서 원칙에 어긋나게 돼버린다.
+
+그래서 생각한 것이 C 언어에서처럼 포인터를 매개변수로 넘겨주면 넘겨받은 함수에서 그 값의 주소값을 갖고 있기 때문에 그 값을 변경할 수가 있다. 이런 것을 **call by reference** 라고 하는데 값만 매개변수에 복사해서 인자로 넘기는 것이 아니라 그 값 자체의 메모리주소값을 참조할 수 있도록 넘기는 것이다.
+
+```js
+...
+  $userSubmitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    const userInput = getUserInput();
+    if (userInput) {
+      showResult(play(computerInput, userInput), computerInput);
+      //computerInput은 배열이기 때문에 call by reference로 넘어간다.
+    }
+  });
+
+  //showResult.js
+  function showResult(resultString, computerInput) {
+    ...
+    computerInput = getComputerInput();
+    ...
+  }
+  //두 번째 매개변수로 받은 computerInput을 수정한다.
+```
+JS에서는 원시값이 아닌 것들은 매개변수로 넘어갈 때 **call by reference**로 넘어간다. 그래서 메모리 주소값을 참조하게 되므로 넘겨받은 함수에서 수정을 하면 원래의 값에도 영향을 미친다.
+
+그래서 위 코드와 같이 `computerInput`을 매개변수로 넘기고 `showResult`함수 내부에서 `computerInput`을 수정하면 된다.
+
+하지만, [에어비엔비 코드컨벤션](https://github.com/airbnb/javascript)에 따르면 위 행동을 금지한다.
+
+![image](./에어비엔비매개변수.png)
+
+1. 절대로 매개변수를 바꾸지 마세요. eslint: no-param-reassign
+2. 절대로 매개변수를 재할당하지 마세요. eslint: no-param-reassign
+
+매개변수로 전달된 객체를 조작하면 원래 호출처에서 원치 않는 사이드 이펙트를 일으킬 수 있다. 또한 매개변수를 재할당하는 것은 예측할 수 없는 결과를 불러 일으킨다. 특히 arguments 객체에 접근할 때이다. 또한 V8에서 최적화 문제를 일으킬 수도 있다.
+
+프로젝트를 진행하면서 에어비엔비 컨벤션을 자주 확인하는데 **모든 컨벤션에는 이유가 있다**.
+
+이러한 이유로 위와 같이 하지 않았고 구조를 바꾸는 방식으로 수정했다.
+
+<br>
+
+### 3-6. 
+
 
 ## 4. git
 
@@ -248,116 +366,7 @@ export default function getUserInput() {
 
 <br>
 
-## 5. 구현 기능 목록 정리
 
-처음 미션을 시작하면서 README 파일에 구현 기능을 정리하면서, "어느 정도로 상세하게 정리해야 하지?" 고민하면서 지우고 쓰기를 반복했다.
-
-처음에는 핵심 클래스 및 세부 메서드까지 설계해서 정리하는데 많은 시간을 쏟았다. 그러나 처음부터 너무 세세한 구현 기능 목록 정리에 힘을 쏟는 것이 비효율적이라고 느꼈다. 개발을 진행하다 보면, 처음에 생각했던 클래스/객체 설계 및 메서드 로직을 불가피하게 수정하는 경우가 많았기 때문이다.
-
-처음부터 너무 완벽한 설계에 집착하기 보다는, 정상 및 비정상(예외) 관련 핵심 기능들을 리스트업하고 개발하면서 주기적으로 목록을 업데이트했다.
-
-완벽해야 한다는 강박관념을 항상 경계하자!
-
-<br>
-
-## 6. Commit Message : 한글 vs 영어
-
-관습적으로 Commit 메시지를 영어로 써왔는데, 이번에 미션을 진행하면서 내 Commit 메시지들을 보니 부족함이 많이 느껴졌다.
-
-![image](https://user-images.githubusercontent.com/56240505/100646024-d65a3a80-3380-11eb-8e4f-2b19b96cdba4.png)
-
-세세하고 명확하게 Commit 메시지를 작성하려고 노력했는데, 모국어가 아니다보니 의도한 바와 다르게 불명확 및 장황한 메시지들이 많았다. 작성 시점에는 괜찮다고 생각했던 메시지들도 추후에 다시 읽을 때는 한 번에 이해 되지 않았다.
-
-또한 처음에는 Body에도 '왜, 무엇을 변경했는지'에 대해 열심히 서술했는데, 뒤로 갈수록 Body를 생략한 Commit 메시지들이 많았다.
-
-Commit 메시지를 나 혼자 읽는 것이라면 상관 없으나, 협업 환경에서는 팀원들에게 꽤 불편할 것이라는 생각이 든다. 협업 팀마다 Commit 메시지 규칙이 다르겠지만, 한국인들하고 작업하는게 명확한 경우 한글 Commit 메시지가 가독성이 조금 더 나을 것 같다.
-
-다음 2주차 미션 때는 Commit 메시지를 한글로 작성하면서 차이점을 느껴 보고, 어떤 방식이 나한테 더 맞는지 고민해 봐야겠다.
-
-<br>
-
-## 7. Test Method Name : 한글 vs 영어
-
-예전에는 테스트 메서드 이름도 영어로 명명했는데, Camel 표기법을 사용하다보니 ``isStrikeThrowsExceptionWhenParameterIsOutOfRange`` 같이 메서드 명이 길어지는 경우 가독성이 심하게 떨어졌다.
-
-[[Java] 인기있는 Unit Test 네이밍 규칙](https://hilucky.tistory.com/216) 글을 참고했다. Given-When-Then을 구분해서 Snake 표기법으로 ``MethodName_StateUnderTest_ExpectedBehavior``와 같이 네이밍하니 가독성이 좋아졌다.
-
-다만 스네이크 표기법을 사용하더라도, 영어를 통해 메서드 이름을 작성하다 보면 Commit 메시지처럼 장황해지는 경우가 많았다. 테스트 메서드 이름을 한글로 작성하면 어떨까?
-
-영어보다 짧아져서 가독성도 증가하고, 테스트가 실패했을 때 어느 기능에서 문제가 발생했는지 직관적으로 알 수 있다는 장점이 있다. 또한 실제 배포시에 테스트는 컴파일에 포함되지 않기 때문에 문제가 되지 않는다.
-
-![image](https://user-images.githubusercontent.com/56240505/100697537-9d9a7f80-33d9-11eb-8f95-a83eedcd7957.png)
-
-다만 한글을 사용하면서 다음과 같은 불편한 점들이 있었다.
-* 한글 특성상 Camel 케이스를 적용하기 힘들기 때문에 _를 많이 사용함.
-* 네이밍 일관성 부족. (User -> 유저, 회원, 사용자 등)
-* 코드 검색시에 누락됨.
-
-특별한 팀 규칙이 없다면, 자기가 보기 편한 방식으로 작성하면 될 듯 싶다. 나는 테스트 메서드 이름을 Given-When-Then 형식으로 작성하는데 한글과 Snake 표기법을 사용했다.
-
-테스트 메서드 이름만으로 테스트의 의도 및 정보를 충분하게 표현하기 어려운 경우가 종종 있다. 자세하게 쓰려고 하면 메서드 명이 너무 길어지기 때문이다. 이럴 때는 @DisplayName을 사용해서 테스트에 대한 추가 정보를 명시해준다.
-
-<br>
-
-## 8. 정적 팩토리 메서드 생성 기준
-
-Effective Java에 나와있는 정적 팩토리 메서드의 장점 중 하나는 가독성이 좋다는 것이다. 메서드 이름을 가질 수 있어서, 일반적인 생성자와 비교했을 때 반환 객체를 잘 묘사할 수 있다.
-
-> BaseballNumbers.java
-
-```java
-public static BaseballNumbers generateRandomBaseballNumbers() {
-    Set<Integer> randomNumbers = new HashSet<>();
-    while (!isGenerationComplete(randomNumbers)) {
-        int randomNumber = RandomUtils.nextInt(BaseballNumber.RANGE_MINIMUM, BaseballNumber.RANGE_MAXIMUM);
-        randomNumbers.add(randomNumber);
-    }
-    List<BaseballNumber> baseballNumbers = randomNumbers.stream()
-            .map(BaseballNumber::valueOf)
-            .collect(Collectors.toList());
-    return new BaseballNumbers(baseballNumbers);
-}
-
-public static BaseballNumbers generateInputBaseballNumbers(List<Integer> inputBaseballNumbers) {
-    validateDuplication(inputBaseballNumbers);
-    List<BaseballNumber> baseballNumbers = inputBaseballNumbers.stream()
-            .map(BaseballNumber::valueOf)
-            .collect(Collectors.toList());
-    return new BaseballNumbers(baseballNumbers);
-}
-```
-
-다양한 방식으로 객체를 생성해야 하는 경우(생성자가 여러개인 경우), 정적 팩토리 메서드를 통해 객체 생성 의도 및 방식을 상세하게 표현할 수 있어서 좋다.
-
-> Application.java
-
-```java
-//Before
-BaseballGameMachine baseballGameMachine =
-        new BaseballGameMachine(BaseballNumbers.generateRandomBaseballNumbers());
-
-//After
-BaseballGameMachine baseballGameMachine = BaseballGameMachine.initiate();
-```
-
-처음에는 위 코드를 보고 ``BaseballGameMachine.initiate()``가 의미를 드러낼 수 있어서 new 생성자보다 좋다고 생각했다. 사실 정적 팩토리 메서드는 new 연산자보다 가독성이 좋을 수 밖에 없다. 이름을 가지고 있기 때문이다.
-
-하지만 BaseballGameMachine은 생성자가 1개이며, 파라미터 또한 1개밖에 받지 않는 비교적 생성이 간단한 객체이다. 내가 가독성이라는 미명 하에 간단한 객체 생성마저도 new 생성자가 아닌 정적 팩토리 메서드를 관습적으로 사용하고 있음을 느꼈다.
-
-정적 팩토리 메서드를 관습적으로 남발하기 보다는, 정말로 필요한 상황에 대해 고려해볼 필요가 있다고 생각했다.
-
-일단 정적 팩토리는 다음과 같은 단점이 존재한다.
-* 정적 팩토리 메서드만 있는 클래스라면, 생성자가 없으므로 하위 클래스를 못 만든다.
-* 정적 팩토리 메서드는 다른 정적 메서드와 잘 구분되지 않는다. (문서만으로 확인하기 어려울 수 있음.)
-
-그렇다면 어떤 경우에 정적 팩토리 메서드 사용을 고려해야 할까? 명확한 기준은 없지만, 예전부터 느낀 점들을 토대로 몇 가지 기준을 세워보았다.
-
-* 생성자가 2개 이상인 경우.
-* 생성자에 들어가는 파라미터가 많은 경우.
-
-이 두 가지 경우는 객체의 생성 의도를 쉽게 유추하기 어렵기 때문에, 생성 의도를 명확하게 표현하기 위해 정적 팩토리 메서드를 사용한다.
-
-따라서 BaseballGameMachine과 같이 1개의 생성자 밖에 없고, 비교적 간단한 파라미터로 생성이 가능한 경우 정적 팩토리 메서드가 꼭 필수라고 생각되지 않는다. 이후, 이런 기준에 따라서 불필요하고 과도한 정적 팩토리 메서드들을 리팩토링했다.
 
 <br>
 
@@ -368,10 +377,4 @@ BaseballGameMachine baseballGameMachine = BaseballGameMachine.initiate();
 * 모던 자바스크립트 Deep Dive (이웅모 저)
 * [모던 자바스크립트 튜토리얼](https://ko.javascript.info/)
 * [git reset 자세히 알기](https://git-scm.com/book/ko/v2/Git-%EB%8F%84%EA%B5%AC-Reset-%EB%AA%85%ED%99%95%ED%9E%88-%EC%95%8C%EA%B3%A0-%EA%B0%80%EA%B8%B0)
-
-* [8) equals 메서드를 오버라이딩 할 때는 보편적 계약을 따르자](http://egloos.zum.com/hahaha333/v/3906967)
-* [[Java] 인기있는 Unit Test 네이밍 규칙](https://hilucky.tistory.com/216)
-* [JUnit5 @Nested, @DisplayName 활용](https://www.freeism.co.kr/wp/archives/1061)
-* [반복문(iteration) vs 재귀(recursion)](https://woowacourse.github.io/javable/2020-04-30/iteration_vs_recursion)
-* [Does Java 8 have tail call optimization?](https://stackoverflow.com/questions/22866491/does-java-8-have-tail-call-optimization)
-* Effective Java 3/E (Joshua Bloch 저)
+* [DOM 생성 방법에 대한 스택오버플로우 문답](https://stackoverflow.com/questions/11550461/when-do-you-use-dom-based-generation-vs-using-strings-innerhtml-jquery-to-gener)

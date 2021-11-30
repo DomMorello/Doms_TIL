@@ -122,7 +122,26 @@ export default function getUserInput() {
 
 ## 3. 구현 중에 했던 고민들
 
-### 3-1. 첫 설계의 착오
+### 3-1. 어떤 기준으로 모듈을 나눠야 할까?
+과제에서 요구하는 항목 중 하나가 모듈로 나눠서 구현을 하라는 것이다. VanillaJS로 프로그램을 만드는 것이 익숙하지 않아서 뭔가 React나 다른 라이브러리처럼 주어진 틀이 없는 기분이었다. 그래서 차근차근히 이 프로그램이 동작하는데 크게 어떤 기능들로 나뉘는지를 생각해보고 적용하려고 했다. 그러다가 알게 된 키워드가 **MVC 패턴**이라는 것이다.
+
+![image](./mvc.png)
+
+MVC(Model View Controller)에서 **모델**은 애플리케이션의 정보(데이터)를 나타내며, **뷰**는 텍스트, 체크박스 항목 등과 같은 사용자 인터페이스 요소를 나타내고, **컨트롤러**는 데이터와 비즈니스 로직 사이의 상호동작을 관리한다.
+
+이 패턴을 사용하면 **사용자 인터페이스로부터 비즈니스 로직을 분리**하여 애플리케이션의 시각적 요소나 그 이면에서 실행되는 비즈니스 로직을 서로 영향 없이 쉽게 고칠 수 있는 애플리케이션을 만들 수 있다.
+
+보통 이 패턴을 사용할 때는 백엔드와 프론트엔드 전반에 걸쳐 사용되는 디자인 패턴이다. 그런데 이번 과제에서도 충분히 각 요소에 맞는 기능들을 분리할 수 있을 것 같아서 디렉토리 구조와 모듈을 나누는 기준으로 사용했다.
+
+1. 모델: 게임의 중추가 되는 비즈니스 로직을 담당한다. `game`디렉토리 안에 있으며 컨트롤러를 통해서 요청한 정보를 받아와 게임을 진행한다.
+2. 뷰: `view` 디렉토리에 있으며 말 그대로 사용자에게 보여지는 UI에 대한 기능들만 모아놨다. (경고창, 게임 재시작 UI 등)
+3. 컨트롤러: `input` 디렉초리에 있으며 사용자가 뷰를 통해 입력하는 값에 대한 유효성 검사를 하고 이 값을 통해 모델에 비즈니스 로직을 실행할 것을 요청한다.
+
+사실 백엔드, 프론트엔드 전반에 걸쳐 실행되는 디자인 패턴인데 작은 프로그램 안에서 나름의 기능을 나누고 디렉토리 구조를 나누는 기준으로 사용하다보니 MVC 패턴이 의도하는 정확한 설계가 된 것 같지는 않다.
+
+하지만 이렇게 함으로써 MVC패턴에서 가장 이점인 기능단위로 적절하게 구조가 짜여진 것 같고 각 기능마다 고유의 일만 하기 때문에 그 부분의 코드만 수정해도 다른 부분에는 영향을 주지 않아 리팩토링을 할 때 실제로 편하고 유용하다고 느끼는 경험을 했다.
+
+### 3-2. 첫 설계의 착오
 
 코드를 짤 때 항상 필요없는 행동을 최소화하기 위해서 노력한다. 그래서 이 게임의 시작은 항상 사용자의 입력이 있는 순간 시작된다는 사실을 인지하고 사용자의 입력을 받는 것을 최우선으로 코드를 짜기 시작했다.
 
@@ -147,7 +166,7 @@ export default function playGame(play) {
 
 <br>
 
-### 3-2. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다
+### 3-3. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다
 
 원래는 이렇게 구조를 생각했다. 기능별로 함수를 나눠야 하기 때문에 `getUserInput` 함수에서는 userInput의 값을 검사해서 유효하면 얻어오도록 하려고 했다. 그런데 이벤트가 발생하는 시점에 콜백함수를 실행하는데 위와 같이 코드를 짜면 userInput에는 항상 null값만 들어온다. 왜냐하면 다른 곳에서 이 함수를 호출해서 return 값을 받아서 사용하려고 했는데 함수를 실행하는 시점에는 `userInput`에 null값이 들어가있기 때문이다. 즉, 야구게임의 경우 사용자의 입력을 받는 순간 그 콜백함수에서 모든 게임 로직이 연속되게 실행돼야 한다는 것이다. 이벤트가 발생했을 때마다 새로운 값을 return 받으려고 했지만 구조적으로 불가능하다는 사실을 알아서 다음과 같이 구조를 바꿨다.
 
@@ -206,7 +225,7 @@ export default function getUserInput() {
 
 <br>
 
-### 3-3. 상수는 어디에 위치해야 할까?
+### 3-4. 상수는 어디에 위치해야 할까?
 기능을 구현하다 보면 절대 변하지 않을 값들이 있고 이를 하드코딩하기 보다는 의미있는 이름을 지어줘서 상수에 할당해서 사용하는 것이 더 좋을 것이라고 생각했다. 
 
 > getComputerInput.js
@@ -236,7 +255,7 @@ export default function getComputerInput() {
 
 하지만 1주차 프로그램은 아주 작은 프로그램이라서 더 효율적인 것처럼 보이지만 큰 프로그램의 경우에는 어떤 식으로 상수를 위치시키는지에 대해서는 아직 확신이 없다. 앞으로도 계속 생각해볼 문제라고 생각한다.
 
-### 3-4. HTML 태그는 어떤 방식으로 생성해야 할까?
+### 3-5. HTML 태그는 어떤 방식으로 생성해야 할까?
 기능을 구현하다가 DOM노드를 건드려야 하는 상황이 왔다. DOM노드를 JS를 통해 조작할 수 있는데 두 가지 방법 중에 무엇을 사용해야 하는지가 고민이었다. `createElement` 함수를 통해서 노드를 만들고 상위 함수를 찾아서 `append` 하는 방법이 있고, `innerHTML` 함수를 이용해서 문자열로 HTML 태그들을 만들어서 넣을 수 있다.
 
 이 부분에 대해서 조사를 해봤는데 [이 포스트](https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/)에 따르면 `createElement`로 생성하고 `append`로 붙이는 것이 성능 상 이점이 있다고 한다. `innerHTML`은 문자열을 파싱해서 내부적으로 DOM노드를 만들고 붙이는 작업을 하기 때문이다. 또한 `innerHTML`은 보안상 문제점이 있다. `innerHTML`의 위험성에 대해서 자세한 설명은 다음 게시글을 참고하면 좋다.
@@ -279,7 +298,7 @@ function renderAskRestartView() {
 
 <br>
 
-### 3-5. call by reference 를 활용하는 것은 어떨까?
+### 3-6. call by reference 를 활용하는 것은 어떨까?
 기능을 구현하다가 정답을 맞추고 `게임 재시작` 버튼을 누르면 **computerInput**을 세 자리 랜덤한 숫자로 다시 생성해야 했다.
 
 > gameEventHandler.js
@@ -343,7 +362,7 @@ JS에서는 원시값이 아닌 것들은 매개변수로 넘어갈 때 **call b
 
 <br>
 
-### 3-6. 변수를 항상 함수의 맨 위에 뒀었는데 다시 생각해보자.
+### 3-7. 변수를 항상 함수의 맨 위에 뒀었는데 다시 생각해보자.
 
 원래 코딩을 할 떄 항상 습관적으로 함수 내부에서만 사용되는 변수들을 선언할 때 항상 위에 모아두는 버릇이 있었다. 정확히 왜 그렇게 하기 시작했는지 모르겠는데 함수 중간에 `const a = 10;` 이런 식으로 들어가있는 게 상당히 보기 싫었다.
 
@@ -378,8 +397,6 @@ export default function showResult(resultString) {
 그래서 위와 같이 예외처리를 먼저 해주고 그 다음에 `const $resultDiv = document.getElementById("result")` 와 같이 선언 및 대입을 해주는 것이 더 맞는 방법이라고 생각한다. 
 
 <br>
-
-### 3-7. 
 
 ## 4. git
 
@@ -433,4 +450,6 @@ export default function showResult(resultString) {
 * [git reset 자세히 알기](https://git-scm.com/book/ko/v2/Git-%EB%8F%84%EA%B5%AC-Reset-%EB%AA%85%ED%99%95%ED%9E%88-%EC%95%8C%EA%B3%A0-%EA%B0%80%EA%B8%B0)
 * [DOM 생성 방법에 대한 스택오버플로우 문답](https://stackoverflow.com/questions/11550461/when-do-you-use-dom-based-generation-vs-using-strings-innerhtml-jquery-to-gener)
 * [createElement vs innerHTML](https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/)
+* [DOM Manipulation and the Dangers of ‘innerHTML’](https://betterprogramming.pub/dom-manipulation-the-dangers-of-innerhtml-602f4119d905)<br>
 * [MDN](https://developer.mozilla.org/en-US/)
+* [MVC 패턴](https://ko.wikipedia.org/wiki/%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%EC%BB%A8%ED%8A%B8%EB%A1%A4%EB%9F%AC)

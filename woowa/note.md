@@ -1,128 +1,41 @@
-구조: MVC 패턴에 대한 고민
-주석을 아무데나 막 썼는데 주석없이 잘 읽히도록 해야된다고 해서 이름 고민 많이 함
-기능담위 커밋에 대해서 고민을 많이 하고 나를 위한 커밋이 아닌 다른 사람을 위한 커밋을 남기기 위해 노력
-클린코드 책
+## 목차
+---
+1. [숫자 야구 게임](#1.-숫자-야구-게임)
+2. [구현 중에 했던 고민들](#2.-구현-중에-했던-고민들)
+    * [2-1. 어떤 기준으로 모듈을 나눠야 할까?](#2-1.-어떤-기준으로-모듈을-나눠야-할까?)
+    * [2-2. 첫 설계의 착오](#2-2.-첫-설계의-착오)
+    * [2-3. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다](#2-3.-함수를-기능-단위로-나눠야-한다-vs-구조적으로-가능한-설계를-해야-한다)
+    * [2-4. 상수는 어디에 위치해야 할까?](#2-4.-상수는-어디에-위치해야-할까?)
+    * [2-5. HTML 태그는 어떤 방식으로 생성해야 할까?](#2-5.-HTML-태그는-어떤-방식으로-생성해야-할까?)
+    * [2-6. call by reference 를 활용하는 것은 어떨까?](#2-6.-call-by-reference-를-활용하는-것은-어떨까?)
+    * [2-7. 변수를 항상 함수의 맨 위에 뒀었는데 다시 생각해보자.](#2-7.-변수를-항상-함수의-맨-위에-뒀었는데-다시-생각해보자.)
+3. [Javascript 기초](#3.-Javascript-기초)
+    * [3-1. new와 생성자 함수](#3-1.-new와-생성자-함수)
+    * [3-2. this](#3-2.-this)
+    * [3-3. forEach 문에서 조건 만족시 break 하기](#3-3.-forEach-문에서-조건-만족시-break-하기)
+    * [3-4. 옵셔널 체이닝 연산자](#3-4.-옵셔널-체이닝-연산자)
+4. [git](#4.-git)
+    * [4-1. git reset --hard 실수](#4-1.-git-reset---hard-실수)
+5. [클린코드](#5.-클린코드)
+    * [5-1. 함수는 하나의 행동만 해야 한다](#5-1.-함수는-하나의-행동만-해야-한다)
+    * [5-2. 함수는 단일 행동을 추상화 해야한다](#5-2.-함수는-단일-행동을-추상화-해야한다)
+    * [5-3. 조건문을 캡슐화 해라](#5-3.-조건문을-캡슐화-해라)
+
+6. [References](#References)
 
 ## 1. 숫자 야구 게임
+---
 
-우아한테크코스 3기의 프리코스 1주차 미션은 숫자 야구 게임 구현이다. 구현 내용은 [프리코스 1주차 미션 저장소](https://github.com/DomMorello/javascript-baseball-precourse/tree/dom)에 업로드했다.
+우아한테크코스 4기의 프리코스 1주차 미션은 숫자 야구 게임 구현이다. 구현 내용은 [프리코스 1주차 미션 저장소](https://github.com/DomMorello/javascript-baseball-precourse/tree/dom)에 업로드했다.
 
 1주차 미션을 진행하면서 고민한 내용들에 대해 개인적으로 공부하고 정리해보았다.
 
 <br>
 
-## 2. Javascript 기초
+## 2. 구현 중에 했던 고민들
+---
 
-VanillaJS 를 충분히 공부하지 않고 React를 다루다 보니 JS에 대한 기본기 훈련이 잘 안 돼있다고 생각한다. 그래서 이번 프리코스를 통해서 부족했던 JS 기본 역량을 보완하는 것이 목표 중에 하나이다. **모던 자바스크립트 Deep dive** 와 여러 레퍼런스를 참고해서 잘 몰랐던 내용에 대해서 정리하면서 학습했다.
-
-### 2-1. new와 생성자 함수
-
-```js
-export default function BaseballGame() {
-  // this = {};  (빈 객체가 암시적으로 만들어짐)
-
-  this.play = function (computerInputNumbers, userInputNumbers) {
-    return "결과 값 String";
-  };
-
-  // return this;  (this가 암시적으로 반환됨)
-}
-```
-위 코드는 미션에서 주어지는 코드인데 `this` 키워드를 이용해서 함수를 정의하고 있고 함수의 컨벤션이 대문자로 시작하는 것으로 보아 생성자 함수임을 알 수 있다.
-
-new BaseballGame()과 같이 코드를 작성하면
-
-1. 빈 객체를 만들어 this에 할당한다.
-2. 함수 본문을 실행한다. 위의 경우 this에 새로운 프로퍼티(play 함수)를 추가해 this를 수정한다.
-3. this를 반환한다.
-
-<br>
-
-### 2-2. this
-
-```js
-let user = {
-  firstName: "dom",
-  sayHi() {
-    let arrow = () => alert(this.firstName);
-    arrow();
-  }
-};
-
-user.sayHi(); // dom
-```
-화살표 함수는 일반 함수와는 다르게 `this`를 고유하게 갖지 않는다. 위와 같이 화살표 함수 내부에서 `this`를 쓰면 더 상위의 범위에서 `this`를 참조한다. 위 경우에서는 user 객체를 가리킨다.
-
-즉, 별개의 this가 만들어지는 건 원하지 않고, 외부 컨텍스트에 있는 this를 이용하고 싶은 경우 화살표 함수가 유용하다.
-
-<br>
-
-### 2-3. forEach 문에서 조건 만족시 break 하기
-
-`forEach` 반복문을 사용해서 검사를 하면서 어떤 조건을 만족하면 반복을 멈추고 `break`나 `return`을 사용해서 나오고 싶을 것이다. 조건을 찾았는데 계속해서 반복문을 찾는 것은 무의미하기 때문이다.
-
-```js
-const a = [1,2,3,4];
-
-a.forEach((element) => {
-    console.log(element);
-    if (element === 2) return;
-});
-
-//outut
-//1
-//2
-//3
-//4
-```
-하지만 `forEach` 구문에서 어떤 조건을 만족했다고 해서 `return`을 해봤자 `forEach` 구문 내부의 콜백함수기 때문에 그 콜백함수만 빠져나오는 것이지 아무 의미가 없다. 위 코드를 실행해보면 1, 2 까지만 출력하고 3, 4는 실행하지 않을 것이라고 생각할 수도 있지만 이는 틀리다.
-
-> 예외를 던지지 않고는 forEach()를 중간에 멈출 수 없습니다. 중간에 멈춰야 한다면 forEach()가 적절한 방법이 아닐지도 모릅니다.<br><br>
-MDN – forEach
-
-MDN 설명에 나와있듯이 `forEach` 에서 중간에 반복을 멈추고 나올 방법은 없다. 조건을 검색하는 반복에서는 이 함수를 사용하는 것이 적절하지 않다.
-
-<br>
-
-### 2-4. 옵셔널 체이닝 연산자
-> ES11(ECMANSript2020)에서 도입된 옵셔널 체이닝 연산자 `?.` 는 좌항의 피연산자가 null 또는 undefined인 경우 undefined를 반환하고, 그렇지 않으면 우항의 프로퍼티 참조를 이어간다.<br><br>
-모던 자바스크립트 Deep Dive p.122
-
-사용자의 입력값인 `userInput` 을 받아오는데 여기서 유효하지 않은 값이 들어오면 `userInput`이 `null`이 되도록 했다. 그런데 return을 할 때 `userInput.join("")` 을 하는데 여기서 `userInput`이 null 이면 에러가 나는 상황에 봉착했다.
-
-그래서 return을 하기 전에 null 검사를 해야 하는 상황인데 여기서 옵셔널 체이닝 연산자를 쓰지 않으면 다음과 같이 했었어야 했다.
-
-```js
-export default function getUserInput() {
-  let userInput = null;
-  const userInputArray = {
-    ...
-    userInput = userInputArray;
-  }
-  return userInput && userInput.join("");
-  //여기서 userInput이 null일 수도 있기 때문에 && 연산자를 통해 검사
-}
-```
-그런데 옵셔널 체이닝 연산자를 이용하면 다음과 같이 수정할 수 있다.
-
-```js
-export default function getUserInput() {
-  let userInput = null;
-  const userInputArray = {
-    ...
-    userInput = userInputArray;
-  }
-  return userInput?.join("");
-  //옵셔널 체이닝 연산자 사용
-}
-```
-위 코드와 같이 **옵셔널 체이닝 연산자**를 사용하면 userInput이 null이거나 undefined이면 undefined를 반환하고 아니라면 우항의 프로퍼티를 참조한다.
-
-<br>
-
-## 3. 구현 중에 했던 고민들
-
-### 3-1. 어떤 기준으로 모듈을 나눠야 할까?
+### 2-1. 어떤 기준으로 모듈을 나눠야 할까?
 과제에서 요구하는 항목 중 하나가 모듈로 나눠서 구현을 하라는 것이다. VanillaJS로 프로그램을 만드는 것이 익숙하지 않아서 뭔가 React나 다른 라이브러리처럼 주어진 틀이 없는 기분이었다. 그래서 차근차근히 이 프로그램이 동작하는데 크게 어떤 기능들로 나뉘는지를 생각해보고 적용하려고 했다. 그러다가 알게 된 키워드가 **MVC 패턴**이라는 것이다.
 
 ![image](./mvc.png)
@@ -133,15 +46,15 @@ MVC(Model View Controller)에서 **모델**은 애플리케이션의 정보(데�
 
 보통 이 패턴을 사용할 때는 백엔드와 프론트엔드 전반에 걸쳐 사용되는 디자인 패턴이다. 그런데 이번 과제에서도 충분히 각 요소에 맞는 기능들을 분리할 수 있을 것 같아서 디렉토리 구조와 모듈을 나누는 기준으로 사용했다.
 
-1. 모델: 게임의 중추가 되는 비즈니스 로직을 담당한다. `game`디렉토리 안에 있으며 컨트롤러를 통해서 요청한 정보를 받아와 게임을 진행한다.
+1. 모델: 게임의 중추가 되는 비즈니스 로직을 담당한다. `game` 디렉토리 안에 있으며 컨트롤러를 통해서 요청한 정보를 받아와 게임을 진행한다.
 2. 뷰: `view` 디렉토리에 있으며 말 그대로 사용자에게 보여지는 UI에 대한 기능들만 모아놨다. (경고창, 게임 재시작 UI 등)
-3. 컨트롤러: `input` 디렉초리에 있으며 사용자가 뷰를 통해 입력하는 값에 대한 유효성 검사를 하고 이 값을 통해 모델에 비즈니스 로직을 실행할 것을 요청한다.
+3. 컨트롤러: `input` 디렉토리에 있으며 사용자가 뷰를 통해 입력하는 값에 대한 유효성 검사를 하고 이 값을 통해 모델에 비즈니스 로직을 실행할 것을 요청한다.
 
 사실 백엔드, 프론트엔드 전반에 걸쳐 실행되는 디자인 패턴인데 작은 프로그램 안에서 나름의 기능을 나누고 디렉토리 구조를 나누는 기준으로 사용하다보니 MVC 패턴이 의도하는 정확한 설계가 된 것 같지는 않다.
 
 하지만 이렇게 함으로써 MVC패턴에서 가장 이점인 기능단위로 적절하게 구조가 짜여진 것 같고 각 기능마다 고유의 일만 하기 때문에 그 부분의 코드만 수정해도 다른 부분에는 영향을 주지 않아 리팩토링을 할 때 실제로 편하고 유용하다고 느끼는 경험을 했다.
 
-### 3-2. 첫 설계의 착오
+### 2-2. 첫 설계의 착오
 
 코드를 짤 때 항상 필요없는 행동을 최소화하기 위해서 노력한다. 그래서 이 게임의 시작은 항상 사용자의 입력이 있는 순간 시작된다는 사실을 인지하고 사용자의 입력을 받는 것을 최우선으로 코드를 짜기 시작했다.
 
@@ -166,7 +79,7 @@ export default function playGame(play) {
 
 <br>
 
-### 3-3. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다
+### 2-3. 함수를 기능 단위로 나눠야 한다 vs 구조적으로 가능한 설계를 해야 한다
 
 원래는 이렇게 구조를 생각했다. 기능별로 함수를 나눠야 하기 때문에 `getUserInput` 함수에서는 userInput의 값을 검사해서 유효하면 얻어오도록 하려고 했다. 그런데 이벤트가 발생하는 시점에 콜백함수를 실행하는데 위와 같이 코드를 짜면 userInput에는 항상 null값만 들어온다. 왜냐하면 다른 곳에서 이 함수를 호출해서 return 값을 받아서 사용하려고 했는데 함수를 실행하는 시점에는 `userInput`에 null값이 들어가있기 때문이다. 즉, 야구게임의 경우 사용자의 입력을 받는 순간 그 콜백함수에서 모든 게임 로직이 연속되게 실행돼야 한다는 것이다. 이벤트가 발생했을 때마다 새로운 값을 return 받으려고 했지만 구조적으로 불가능하다는 사실을 알아서 다음과 같이 구조를 바꿨다.
 
@@ -225,7 +138,7 @@ export default function getUserInput() {
 
 <br>
 
-### 3-4. 상수는 어디에 위치해야 할까?
+### 2-4. 상수는 어디에 위치해야 할까?
 기능을 구현하다 보면 절대 변하지 않을 값들이 있고 이를 하드코딩하기 보다는 의미있는 이름을 지어줘서 상수에 할당해서 사용하는 것이 더 좋을 것이라고 생각했다. 
 
 > getComputerInput.js
@@ -255,7 +168,7 @@ export default function getComputerInput() {
 
 하지만 1주차 프로그램은 아주 작은 프로그램이라서 더 효율적인 것처럼 보이지만 큰 프로그램의 경우에는 어떤 식으로 상수를 위치시키는지에 대해서는 아직 확신이 없다. 앞으로도 계속 생각해볼 문제라고 생각한다.
 
-### 3-5. HTML 태그는 어떤 방식으로 생성해야 할까?
+### 2-5. HTML 태그는 어떤 방식으로 생성해야 할까?
 기능을 구현하다가 DOM노드를 건드려야 하는 상황이 왔다. DOM노드를 JS를 통해 조작할 수 있는데 두 가지 방법 중에 무엇을 사용해야 하는지가 고민이었다. `createElement` 함수를 통해서 노드를 만들고 상위 함수를 찾아서 `append` 하는 방법이 있고, `innerHTML` 함수를 이용해서 문자열로 HTML 태그들을 만들어서 넣을 수 있다.
 
 이 부분에 대해서 조사를 해봤는데 [이 포스트](https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/)에 따르면 `createElement`로 생성하고 `append`로 붙이는 것이 성능 상 이점이 있다고 한다. `innerHTML`은 문자열을 파싱해서 내부적으로 DOM노드를 만들고 붙이는 작업을 하기 때문이다. 또한 `innerHTML`은 보안상 문제점이 있다. `innerHTML`의 위험성에 대해서 자세한 설명은 다음 게시글을 참고하면 좋다.
@@ -298,7 +211,7 @@ function renderAskRestartView() {
 
 <br>
 
-### 3-6. call by reference 를 활용하는 것은 어떨까?
+### 2-6. call by reference 를 활용하는 것은 어떨까?
 기능을 구현하다가 정답을 맞추고 `게임 재시작` 버튼을 누르면 **computerInput**을 세 자리 랜덤한 숫자로 다시 생성해야 했다.
 
 > gameEventHandler.js
@@ -362,7 +275,7 @@ JS에서는 원시값이 아닌 것들은 매개변수로 넘어갈 때 **call b
 
 <br>
 
-### 3-7. 변수를 항상 함수의 맨 위에 뒀었는데 다시 생각해보자.
+### 2-7. 변수를 항상 함수의 맨 위에 뒀었는데 다시 생각해보자.
 
 원래 코딩을 할 떄 항상 습관적으로 함수 내부에서만 사용되는 변수들을 선언할 때 항상 위에 모아두는 버릇이 있었다. 정확히 왜 그렇게 하기 시작했는지 모르겠는데 함수 중간에 `const a = 10;` 이런 식으로 들어가있는 게 상당히 보기 싫었다.
 
@@ -398,7 +311,117 @@ export default function showResult(resultString) {
 
 <br>
 
+## 3. Javascript 기초
+---
+VanillaJS 를 충분히 공부하지 않고 React를 다루다 보니 JS에 대한 기본기 훈련이 잘 안 돼있다고 생각한다. 그래서 이번 프리코스를 통해서 부족했던 JS 기본 역량을 보완하는 것이 목표 중에 하나이다. **모던 자바스크립트 Deep dive** 와 여러 레퍼런스를 참고해서 잘 몰랐던 내용에 대해서 정리하면서 학습했다.
+
+### 3-1. new와 생성자 함수
+
+```js
+export default function BaseballGame() {
+  // this = {};  (빈 객체가 암시적으로 만들어짐)
+
+  this.play = function (computerInputNumbers, userInputNumbers) {
+    return "결과 값 String";
+  };
+
+  // return this;  (this가 암시적으로 반환됨)
+}
+```
+위 코드는 미션에서 주어지는 코드인데 `this` 키워드를 이용해서 함수를 정의하고 있고 함수의 컨벤션이 대문자로 시작하는 것으로 보아 생성자 함수임을 알 수 있다.
+
+new BaseballGame()과 같이 코드를 작성하면
+
+1. 빈 객체를 만들어 this에 할당한다.
+2. 함수 본문을 실행한다. 위의 경우 this에 새로운 프로퍼티(play 함수)를 추가해 this를 수정한다.
+3. this를 반환한다.
+
+<br>
+
+### 3-2. this
+
+```js
+let user = {
+  firstName: "dom",
+  sayHi() {
+    let arrow = () => alert(this.firstName);
+    arrow();
+  }
+};
+
+user.sayHi(); // dom
+```
+화살표 함수는 일반 함수와는 다르게 `this`를 고유하게 갖지 않는다. 위와 같이 화살표 함수 내부에서 `this`를 쓰면 더 상위의 범위에서 `this`를 참조한다. 위 경우에서는 user 객체를 가리킨다.
+
+즉, 별개의 this가 만들어지는 건 원하지 않고, 외부 컨텍스트에 있는 this를 이용하고 싶은 경우 화살표 함수가 유용하다.
+
+<br>
+
+### 3-3. forEach 문에서 조건 만족시 break 하기
+
+`forEach` 반복문을 사용해서 검사를 하면서 어떤 조건을 만족하면 반복을 멈추고 `break`나 `return`을 사용해서 나오고 싶을 것이다. 조건을 찾았는데 계속해서 반복문을 찾는 것은 무의미하기 때문이다.
+
+```js
+const a = [1,2,3,4];
+
+a.forEach((element) => {
+    console.log(element);
+    if (element === 2) return;
+});
+
+//outut
+//1
+//2
+//3
+//4
+```
+하지만 `forEach` 구문에서 어떤 조건을 만족했다고 해서 `return`을 해봤자 `forEach` 구문 내부의 콜백함수기 때문에 그 콜백함수만 빠져나오는 것이지 아무 의미가 없다. 위 코드를 실행해보면 1, 2 까지만 출력하고 3, 4는 실행하지 않을 것이라고 생각할 수도 있지만 이는 틀리다.
+
+> 예외를 던지지 않고는 forEach()를 중간에 멈출 수 없습니다. 중간에 멈춰야 한다면 forEach()가 적절한 방법이 아닐지도 모릅니다.<br><br>
+MDN – forEach
+
+MDN 설명에 나와있듯이 `forEach` 에서 중간에 반복을 멈추고 나올 방법은 없다. 조건을 검색하는 반복에서는 이 함수를 사용하는 것이 적절하지 않다.
+
+<br>
+
+### 3-4. 옵셔널 체이닝 연산자
+> ES11(ECMANSript2020)에서 도입된 옵셔널 체이닝 연산자 `?.` 는 좌항의 피연산자가 null 또는 undefined인 경우 undefined를 반환하고, 그렇지 않으면 우항의 프로퍼티 참조를 이어간다.<br><br>
+모던 자바스크립트 Deep Dive p.122
+
+사용자의 입력값인 `userInput` 을 받아오는데 여기서 유효하지 않은 값이 들어오면 `userInput`이 `null`이 되도록 했다. 그런데 return을 할 때 `userInput.join("")` 을 하는데 여기서 `userInput`이 null 이면 에러가 나는 상황에 봉착했다.
+
+그래서 return을 하기 전에 null 검사를 해야 하는 상황인데 여기서 옵셔널 체이닝 연산자를 쓰지 않으면 다음과 같이 했었어야 했다.
+
+```js
+export default function getUserInput() {
+  let userInput = null;
+  const userInputArray = {
+    ...
+    userInput = userInputArray;
+  }
+  return userInput && userInput.join("");
+  //여기서 userInput이 null일 수도 있기 때문에 && 연산자를 통해 검사
+}
+```
+그런데 옵셔널 체이닝 연산자를 이용하면 다음과 같이 수정할 수 있다.
+
+```js
+export default function getUserInput() {
+  let userInput = null;
+  const userInputArray = {
+    ...
+    userInput = userInputArray;
+  }
+  return userInput?.join("");
+  //옵셔널 체이닝 연산자 사용
+}
+```
+위 코드와 같이 **옵셔널 체이닝 연산자**를 사용하면 userInput이 null이거나 undefined이면 undefined를 반환하고 아니라면 우항의 프로퍼티를 참조한다.
+
+<br>
+
 ## 4. git
+---
 
 ### 4-1. git reset --hard 실수
 여러 디렉토리가 있는 프로젝트를 진행하는 중에 현재 디렉토리의 위치를 모르고 `git add .` 명령어를 통해서 commit 을 하는 경우가 있다. 그런데 add할 파일들이 여러 개가 있는데 현재 디렉토리의 위치가 하위 디렉토리에 있다는 것을 모르고 전체가 다 add된 줄 알고 진행을 해버렸다. 
@@ -437,15 +460,197 @@ export default function showResult(resultString) {
 
 <br>
 
+## 5. 클린코드
+---
 
+### 5-1. 함수는 하나의 행동만 해야 한다
+
+[클린코드 Javascript](https://github.com/qkraudghgh/clean-code-javascript-ko)에 따르면 다음과 같은 예시를 주고 있다.
+> 안 좋은 예
+```js
+function emailClients(clients) {
+  clients.forEach(client => {
+    const clientRecord = database.lookup(client);
+    if (clientRecord.isActive()) {
+      email(client);
+    }
+  });
+}
+```
+위 코드를 보면 `emailClients` 함수에서 하는 행동은
+1. 클라이언트가 활성화돼있는지를 검사
+2. 이메일 보내기
+
+이렇게 두 가지로 볼 수 있다.
+> 좋은 예
+```js
+function emailClients(clients) {
+  clients
+    .filter(isClientActive)
+    .forEach(email);
+}
+
+function isClientActive(client) {
+  const clientRecord = database.lookup(client);
+  return clientRecord.isActive();
+}
+```
+하지만 위 코드에서 수정된 사항을 보면 `emailClients` 함수에서 활성화돼있는 고객을 걸러서 이메일을 보낸다. 그리고 `isClientActive` 라는 함수를 분리해서 활성화돼있는지를 검사하는 로직을 이 함수 안에 넣었다.
+
+**좋은 예**로 수정을 하면서 이메일을 보내는 행동과 클라이언트가 활성화돼있는지를 검사하는 행동을 함수로 나눈 것을 알 수 있다.
+
+이 원칙을 최대한 지키려고 기능 구현을 하는데 생각보다 어떤 **행동**을 나누는 기준이 상당히 모호하다는 생각을 했다. 어떻게든 논리적으로 함수를 분리할 수 있는대로 분리한다면 한 가지의 기능을 하는 함수로 나누는 목표를 달성할 수 있지 않을까 생각했지만 아직도 이 방법에 대해서는 내가 잘 하고 있는지에 대한 확신이 없다.
+
+> getComputerInput.js
+```js
+export default function getComputerInput() {
+  const computerInput = new Set();
+  while (computerInput.size < INPUT_LENGTH) {
+    computerInput.add(window.MissionUtils.Random.pickNumberInRange(1, 9));
+  }
+  return Number([...computerInput].join(''));
+}
+```
+위 코드를 보면 중복없이 Set에 랜던생성한 숫자를 `add` 해서 중복없는 세 자리의 number를 반환한다. 이 경우에는 `getComputerInput` 함수 이름에 걸맞게 한 가지 행동을 하는 것 같다.
+
+하지만, 아래의 경우를 한 번 살펴보자.
+> getGameResult.js
+```js
+export default function getGameResult(computerInput, userInput) {
+  if (computerInput === userInput) return ANSWER;
+  const { ballCount, strikeCount } = countBallStrike(
+    String(computerInput).split(''),
+    String(userInput).split('')
+  );
+  if (ballCount === 0 && strikeCount === 0) return NOTHING;
+  if (ballCount === 0 && strikeCount !== 0) return `${strikeCount}스트라이크`;
+  if (ballCount !== 0 && strikeCount === 0) return `${ballCount}볼`;
+  return `${ballCount}볼 ${strikeCount}스트라이크`;
+}
+```
+위 코드는 단순하지가 않다. `getGameResult` 함수에서는 경우에 따라 게임의 결과를 string 으로 반환한다. 하지만 이 함수 안에서 `ballCount`, `strikeCount` 를 각각 구해서 그 값에 따라서 다른 결과물을 보여줘야 했다. 그렇다면 이 함수는 **볼, 스트라이크 개수를 구하는 행동**과 **결과값을 반환하는 행동**으로 두 가지 행동을 하는 걸까? 이러한 의문에 대한 기준이 명확하지 않은 것 같다.
+
+하지만 위 의문을 어느 정도 해소해주는 클린코드 원칙(**5-2.**)이 있었다.
+
+### 5-2. 함수는 단일 행동을 추상화 해야한다
+함수를 만들다보면 그 함수 내부에서 여러 가지의 일을 수행하고 그 일의 결과값에 따라서 어떤 행동을 해야 하는 다소 추상적이고 복잡한 함수를 만들어야 할 때가 있다.
+
+과연 그런 경우에는 한 가지 기능을 하는 함수인가라고 의문이 들었는데 다음 예를 보면서 어느 정도 해소가 되었다.
+> 안 좋은 예
+```js
+function parseBetterJSAlternative(code) {
+  const REGEXES = [
+    // ...
+  ];
+
+  const statements = code.split(' ');
+  const tokens = [];
+  REGEXES.forEach(REGEX => {
+    statements.forEach(statement => {
+      // ...
+    });
+  });
+
+  const ast = [];
+  tokens.forEach(token => {
+    // lex...
+  });
+
+  ast.forEach(node => {
+    // parse...
+  });
+}
+```
+위의 함수를 보면 여러 가지의 복합적인 행동을 한 함수 안에서 수행해야 하는 경우이다. 그런데 함수를 분리하지 않고 한 함수 내에서 코드로써 모든 행동들을 연속해서 나열하고 있다.
+
+> 좋은 예
+```js
+function tokenize(code) {
+  const REGEXES = [
+    // ...
+  ];
+
+  const statements = code.split(' ');
+  const tokens = [];
+  REGEXES.forEach(REGEX => {
+    statements.forEach(statement => {
+      tokens.push( /* ... */ );
+    });
+  });
+
+  return tokens;
+}
+
+function lexer(tokens) {
+  const ast = [];
+  tokens.forEach(token => {
+    ast.push( /* ... */ );
+  });
+
+  return ast;
+}
+
+function parseBetterJSAlternative(code) {
+  const tokens = tokenize(code);
+  const ast = lexer(tokens);
+  ast.forEach(node => {
+    // parse...
+  });
+}
+```
+위 코드에서는 기능들을 나눠서 복합적인 기능을 하는 함수(`parseBetterJSAlternative`)내부에서 호출해서 사용하는 것을 볼 수 있다. 그렇다면 다소 추상적인 함수도 당연히 있을 수 밖에 없는 것이고 그 함수 내에서 기능을 나눌 수 있다면 여러 함수를 나눠서 사용한다면 테스트할 때도 함수 단위로 좋고 가독성도 더 좋을 것이다.
 
 <br>
+
+### 5-3. 조건문을 캡슐화 해라
+> 안 좋은 예
+```js
+if (fsm.state === 'fetching' && isEmpty(listNode)) {
+  // ...
+}
+```
+> 좋은 예
+```js
+function shouldShowSpinner(fsm, listNode) {
+  return fsm.state === 'fetching' && isEmpty(listNode);
+}
+
+if (shouldShowSpinner(fsmInstance, listNodeInstance)) {
+  // ...
+}
+```
+단순한 조건물을 함수로 만들어서 얻는 이점은 무엇일까? 바로 함수명을 적절하게 지어줌으로써 다른 개발자가 이 조건절을 봤을 때 함수명으로 어떤 행동을 할 지 예측 가능하게 해준다는 것이다. 그래서 이번 프로젝트에서 조건문을 캡슐화했다가 너무 당연한 부분이라서 다시 함수를 지우고 풀어서 조건문 안에 코드로 넣었었는데 이 부분을 다시 수정했다. 함수명을 적절하게 작성해준다면 함수 내부를 보지 않고도 유추가 가능하고 좀 더 가독성이 좋은 코드가 될 것이다.
+
+> getGameResult.js
+```js
+export default function getGameResult(computerInput, userInput) {
+  if (computerInput === userInput) return ANSWER;
+  ...
+}
+```
+원래는 위 코드처럼 `computerInput`과 `userInput`을 비교해서 정답인 경우를 반환하는 코드였는데 조건 캡슐화를 위해서 다음과 같이 수정했다.
+
+> getGameResult.js
+```js
+function isComputerUserInputSame(computerInput, userInput) {
+  return computerInput === userInput;
+}
+
+export default function getGameResult(computerInput, userInput) {
+  if (isComputerUserInputSame(computerInput, userInput)) return ANSWER;
+  ...
+}
+```
+`isComputerUserInputSame`이라는 이름의 함수를 만들어서 캡슐화를 하고 함수명을 통해서 의미가 명확하게 전달되도록 했다. 물론 위 같은 경우는 굳이 캡슐화를 하지 않아도 의미가 명확할 수는 있지만 이런 습관을 들인다는 것이 클린코드를 작성하는 첫 걸음이라고 생각한다.
+
+
 
 ---
 
 ## References
 
 * 모던 자바스크립트 Deep Dive (이웅모 저)
+* 클린코드 (Robert C. Martin 저)
 * [모던 자바스크립트 튜토리얼](https://ko.javascript.info/)
 * [git reset 자세히 알기](https://git-scm.com/book/ko/v2/Git-%EB%8F%84%EA%B5%AC-Reset-%EB%AA%85%ED%99%95%ED%9E%88-%EC%95%8C%EA%B3%A0-%EA%B0%80%EA%B8%B0)
 * [DOM 생성 방법에 대한 스택오버플로우 문답](https://stackoverflow.com/questions/11550461/when-do-you-use-dom-based-generation-vs-using-strings-innerhtml-jquery-to-gener)
@@ -453,3 +658,4 @@ export default function showResult(resultString) {
 * [DOM Manipulation and the Dangers of ‘innerHTML’](https://betterprogramming.pub/dom-manipulation-the-dangers-of-innerhtml-602f4119d905)<br>
 * [MDN](https://developer.mozilla.org/en-US/)
 * [MVC 패턴](https://ko.wikipedia.org/wiki/%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%EC%BB%A8%ED%8A%B8%EB%A1%A4%EB%9F%AC)
+* [클린코드 javascript](https://github.com/qkraudghgh/clean-code-javascript-ko)

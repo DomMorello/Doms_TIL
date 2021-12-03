@@ -88,7 +88,7 @@ morello.hi();
 
 위 코드에서처럼 **프로토타입** 함수를 선언하면 생성자 함수를 통해 객체가 생성되더라도 `sayHi` 함수는 한 번만 정의되고 할당된다.
 
-좋은 방법처럼 보이지만 이 방법에 문제가 있었다. **[에어비엔비 코드컨벤션](https://github.com/ParkSB/javascript-style-guide)**을 보면 다음과 같은 항목이 있다.
+좋은 방법처럼 보이지만 이 방법에 문제가 있었다. [**에어비엔비 코드컨벤션**](https://github.com/ParkSB/javascript-style-guide)을 보면 다음과 같은 항목이 있다.
 
 ![image](./airbnb.png)
 
@@ -107,6 +107,61 @@ class Person {
 ```
 
 위 함수처럼 `sayHi` 함수를 클래스 내부에 정의하면 그 함수는 **프로토타입**에 저장된다. 즉, `Person.prototype` 에 저장이 되기 때문에 위에서 말한 문제는 클래스 문법을 사용함으로써 알아서 해결되는 것이다.
+
+### 2-4. 클래스 내부에서만 사용되는 함수
+
+기능 구현을 하다가 `Input` 클래스를 만들어서 내부에 유효성을 검사하는 메소드를 만들었다. 입력값과 관련이 있기 때문에 입력값을 set하기 전에 유효성을 검사하기 위해서다.
+
+다음 코드를 보면 처음에 만든 `Input` 클래스이다.
+
+> Input.js
+
+```js
+export default class Input {
+  ...
+  isValidCarNames(carNames) {
+    /* 유효성 검증 코드 */
+  }
+
+  setCarNames(carNames) {
+    if (this.isValidCarNames(carNames)) {
+      this.carNames = carNames;
+      return ;
+    }
+    this.carNames = null;
+  }
+  ...
+}
+```
+위 코드를 보면 `setCarNames` 함수에서 유효성을 검증한 후에 값을 할당한다. 그렇게 유효성을 검증하기 위해서 사용하는 `isValidCarNames` 함수는 해당 클래스 내부에서만 사용된다. 이 클래스를 통해서 만들어진 객체를 사용할 때 클래스 외부에서 다음과 같이 사용할 수 있다는 말이다.
+```js
+const userInput = new Input();
+
+userInput.isValidCarNames(['123','456']);
+```
+그런데 이렇게 사용하려고 만든 함수가 아니다. 객체가 전혀 사용할 일이 없고 함수 내부에서만 필요에 의해서 사용되는 함수이기 때문에 이 방법에 대해서 의문이 생겼다.
+
+**정적 메서드**와 **프로토타입 메서드**의 차이는 프로토타입 체인이 다르다는 것이다. **정적 메서드**는 메서드 내부에서 클래스를 호출한 객체의 프로퍼티에 접근할 수 없다. 왜냐하면 객체가 호출할 수 없는 메서드이기 때문이다. 그래서 자바스크립트 Deep Dive에 따르면 '**this를 사용하지 않는 메서드는 정적 메서드로 정의하는 것이 좋다**'라고 한다.
+
+이러한 이유로 위 코드를 다음과 같이 정적 메서드를 사용하는 방법으로 수정했다.
+
+```js
+export default class Input {
+  ...
+  static isValidCarNames(carNames) {
+    /* 유효성 검증 코드 */
+  }
+
+  setCarNames(carNames) {
+    if (Input.isValidCarNames(carNames)) {
+      this.carNames = carNames;
+      return ;
+    }
+    this.carNames = null;
+  }
+  ...
+}
+```
 
 ---
 

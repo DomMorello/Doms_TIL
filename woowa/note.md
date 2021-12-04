@@ -176,6 +176,7 @@ export default class Input {
 4. 클래스 내의 모든 코드에는 **strict mode**가 지정되어 실행되며 이를 해제할 수 없다.
 5. 클래스의 `constructor`, 프로토타입 메서드, 정적 메서드는 모두 프로퍼티 어트리뷰트 `[[Enumerable]`]의 값이 `false`다. 다시 말해, 열거되지 않는다.
 
+
 ## 4. Git
 
 ---

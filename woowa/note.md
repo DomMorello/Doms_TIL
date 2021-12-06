@@ -13,7 +13,7 @@ READEME.md를 상세히 작성하라
 
 ---
 
-우아한테크코스 4기의 프리코스 2주차 미션은 자동차 경주 게임 구현이다. 구현 내용은 [프리코스 2주차 미션 저장소](...)에 업로드했다.
+우아한테크코스 4기의 프리코스 2주차 미션은 자동차 경주 게임 구현이다. 구현 내용은 [프리코스 2주차 미션 저장소](https://github.com/DomMorello/javascript-racingcar-precourse/tree/dom)에 업로드했다.
 
 2주차 미션을 진행하면서 고민한 내용들에 대해 개인적으로 공부하고 정리해보았다.
 
@@ -47,15 +47,9 @@ READEME.md를 상세히 작성하라
 1. 입력을 받아라. (Input 객체가 예외를 처리하고 입력값을 저장한다)
 2. 경주할 자동차들을 만들어라. (Input의 정보를 이용해 CarController가 Car 객체를 생성한다)
 3. 경주를 시작해라. (CarController 객체가 Car객체를 이용해 경주를 시작한다)
-4. 결과를 보여줘라. (결과를 받아와서 View 객체를 이용해 화면을 보여준다)
+4. 결과를 보여줘라. (CarController로부터 결과를 받아와서 View 객체를 이용해 화면을 보여준다)
 
-
-
-### 2-2. UI를 어떻게 할까?
-
-UI를 잘 만들면 예외를 처리하는 코드를 줄일 수 있다.
-
-### 2-3. 생성자 함수 VS 클래스
+### 2-2. 생성자 함수 VS 클래스
 
 과제에서 **클래스를 분리하는 것**이 2주차의 목표라고 했다. 그런데 JS 문법을 보면 생성자 함수도 있고 클래스 문법도 있다. 클래스 문법은 비교적 최신 JS 문법이다. 클래스에 대해서 공부를 해봤는데 생성자 함수와의 차이점에 대해서 크게 모르겠다. 아래에서 보다시피 과제에서도 클래스 형식을 쓸지 생성자 함수 형식을 쓸지를 선택하라고 한다.
 
@@ -112,7 +106,7 @@ class Person {
 
 위 함수처럼 `sayHi` 함수를 클래스 내부에 정의하면 그 함수는 **프로토타입**에 저장된다. 즉, `Person.prototype` 에 저장이 되기 때문에 위에서 말한 문제는 클래스 문법을 사용함으로써 알아서 해결되는 것이다.
 
-### 2-4. 클래스 내부에서만 사용되는 함수
+### 2-3. 클래스 내부에서만 사용되는 함수
 
 기능 구현을 하다가 `Input` 클래스를 만들어서 내부에 유효성을 검사하는 메소드를 만들었다. 입력값과 관련이 있기 때문에 입력값을 set하기 전에 유효성을 검사하기 위해서다.
 
@@ -167,6 +161,33 @@ export default class Input {
 }
 ```
 
+그런데, 이렇게 하는 방식의 문제점은 클래스와 관련이 깊은 함수라서 클래스 내부에 선언하긴 했지만 외부에서 **클래스이름으로 접근해서 이 함수를 사용할 수 있다는 것**이다. 그렇다면 다른 개발자가 이 코드를 봤을 때 다른 곳에서 이 클래스에 접근해서 이 함수들을 사용하라는 의도로 잘못파악할 여지가 있다고 생각했다.
+
+그래서 생각한 방법은 그렇다면 외부에서 접근할 수 없는 함수고 클래스 내부에서만 사용하려면 어떻게 함수를 위치시켜야 할까를 고민하다가 모듈의 **import, export**를 생각했다. 함수를 파일 안에서 정의하고 **export를 하지 않으면 해당 파일 외부에서는 사용될 리 없는 함수**라고 의도를 잘 담을 수 있겠다는 생각을 했다.
+
+그래서 아래와 같이 최종적으로 수정했다.
+
+> Input.js
+
+```js
+function isValidCarNames(carNames) {
+  /* 유효성 검증 코드 */
+}
+
+export default class Input {
+  ...
+  setCarNames(carNames) {
+    if (isValidCarNames(carNames)) {
+      this.carNames = carNames;
+      return ;
+    }
+    this.carNames = null;
+  }
+  ...
+}
+```
+이렇게 한다면 `isValidNames` 라는 함수는 export 되지 않으니 이 파일 내에서만 사용된다는 의도를 담을 수 있고 클래스를 통헤서 외부에서 호출할 수도 없으니 개발자의 의도를 잘 구현했다고 생각했다. 하지만 이렇게 하는 방법이 과연 정답에 가까운지는 사실 아직 잘 모르겠다.
+
 ---
 
 ## 3. JavaScript
@@ -199,11 +220,52 @@ every는 callback이 거짓을 반환하는 요소를 찾을 때까지 배열에
 ```
 입력값의 예외를 처리할 때 위와 같이 `find`함수를 사용했는데 `every`함수를 사용해서도 문제를 처리할 수 있다.
 
+### 3-3. JS class constructor overload
+클래스를 생성하고 객체를 만드는데 `constructor`를 때때로 다르게 사용하고 싶은 경우가 생겼다. 그래서 검색을 해봤는데 JS 에서는 Java나 다른 언어처러 **constructor overload를 허용하지 않는다**.
+
+그렇다면 객체를 생성할 때 다음과 같은 문제는 어떻게 해결할 수 있을까?
+
+```js
+const DEFAULT_WHEEL_NUMBER = 4;
+const DEFAULT_COLOR = "black";    
+const DEFAULT_NAME = "myCar";
+
+class Car{
+  constructor(numberWheels, aName, aColor){
+    this.wheelsNum = numberWheels;
+    this.name = aName;
+    this.color = aColor;
+  }
+
+  constructor(aName){
+    this(DEFUALT_WHEEL_NUMBER, aName, DEFAULT_COLOR);
+  }
+
+  constructor(){
+    this(DEFUALT_WHEEL_NUMBER, DEFAULT_NAME, DEFAULT_COLOR);
+  }
+}
+```
+
+이렇게 다양한 `constructor`를 사용하고 싶은 경우에는 **default parameters**를 사용하면 된다.
+매개변수에 값이 들어올 때는 그 값을 참조하고 값이 들어오지 않는 경우에는 매개변수에 기본값을 설정하는 것이다. 다음과 같이 구현할 수 있다.
+
+```js
+class Car {
+  constructor(numberWheels = 4, aName = "myCar", aColor = "black"){
+    this.wheelsNum = numberWheels;
+    this.name = aName;
+    this.color = aColor;
+  }
+}
+```
 
 ## 4. Git
 
 ---
 ### 4-1. rebase를 이용한 지난 커밋로그 수정
+
+
 
 
 ## References
@@ -212,3 +274,5 @@ every는 callback이 거짓을 반환하는 요소를 찾을 때까지 배열에
 - [모던 자바스크립트 튜토리얼](https://ko.javascript.info/)
 - [우아한형제들 기술블로그 - 생각하라, 객체지향처럼](https://techblog.woowahan.com/2502/)
 - [함수 생성자와 클래스의 차이](https://uiyoji-journal.tistory.com/101)
+- [JS contructor overload](https://stackoverflow.com/questions/38240744/how-to-overload-constructors-in-javascript-ecma6)
+

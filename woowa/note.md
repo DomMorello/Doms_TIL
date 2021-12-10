@@ -18,6 +18,8 @@
 
 **여러 개의 클래스를 분리한 후 서로 관계를 맺어 하나의 프로그램을 완성**하는 것이 3주차 미션의 목표이다. 클래스를 어떻게 **객체지향**적으로 분리하고 어떻게 서로 관계를 맺을지를 고민해서 적용했다. 기본적으로 모든 프리코스 과제와 같이 **MVC 패턴**을 유지하려고 노력했다.
 
+...
+
 ### 2-2. 비즈니스 로직과 UI 를 분리하라
 1,2주차 과제를 진행하면서 **MVC 패턴**을 유지하려고 노력했다. 특히 디렉토리 구조를 명확하게 나눠서 input, view 디렉토리를 두고 UI를 모두 view 디렉토리에 넣고 진행했다. 그런데 2주차 피드백을 보고 이렇게 하는 것이 답은 아니라는 것을 느꼈다.
 
@@ -25,9 +27,115 @@
 
 피드백 내용을 살펴보면 위 사진과 같다. 내가 지금까지 했던 방식과는 다르게 `Car` 클래스 내부에서 UI 로직을 갖고 있는 것을 볼 수 있다. 이 피드백을 받고 지금까지 했던 방식과는 다르게 해보려고 생각했다. 우선 `Car`와 밀접하게 관련된 UI 를 보여주는 함수가 `Car` 클래스 내부에 선언돼 있는 것이 합리적이다. 내가 기존에 했던 방식으로 했을 때는 **View 클래스에 서로 관련 없는 UI 로직이 다 뭉쳐져 있었다**. 이런 부분은 확실히 그 해당 클래스에 역할이 무엇인지를 명확하게 밝힐 수 없는 구조인 것 같다.
 
+...
+
 ### 2-3. innerHTML vs insertAdjscentHTML
+...
 (https://oniondev.tistory.com/17)
 (https://developer.mozilla.org/ko/docs/Web/API/Element/insertAdjacentHTML)
+
+### 2-4. UI에 보여질 상태를 어떻게 관리할 것인가?
+이번 주차 과제 요구사항 중 하나는 '**새로고침을 하여도 최근 작업내역이 보여야 한다**'이다. 이는 `localStorage`를 이용해서 마치 백엔드의 DB에 저장된 값을 불러와서 화면을 보여주는 것과 같은 효과를 낼 수 있다. 그런데 어떤 이벤트가 발생했을 때 어떤 클래스의 메서드를 이용해서 뷰를 보여주면 새로고침을 했을 때는 조작된(추가된) DOM 정보가 모두 사라지기 때문에 최근 작업내역을 보여줄 수가 없다.
+
+그래서 이렇게 생각했다. 새로고침을 하지 않고 프로그램을 사용자가 계속 조작하는 경우와 새로고침을 했을 때의 경우를 나눠서 생각했다. 사용자가 새로고침을 하지 않고 입력값을 넣고 하는 등의 문제는 각 클래스에 있는 `render()` 메서드를 사용해서 DOM을 조작하면 된다. 그러면 UI에 보여줄 상태 데이터들을 최신의 상태로 잘 볼 수 있을 것이다.
+
+그렇다면 새로고침을 했을 때는 어떻게 최근 작업내역을 보여줄까? `localStorage`에 최근까지 작업한 내용을 전부 불러와서 view를 init할 때 보여주면 된다. 
+
+...
+
+### 2-5. DOM append 이후 참조에 대한 문제
+DOM 노드를 만들어서 보여줄 때 어떤 문제를 발견했다. 이러한 문제가 발생하는 원인에 대해서 깊이있게 공부하진 못했지만 합리적인 추측이 가능했다. 문제는 다음과 같다.
+
+> initProductAdd.js
+
+```js
+function renderProductAddList($productAdd) {
+  const $listContainer = document.createElement('div');
+
+  $listContainer.innerHTML = `
+    <h3>${PRODUCT_LIST_TITLE}</h3>
+    <table id="${PRODUCT_LIST_TABLE_ID}" bgcolor="black" border="1" style="border-collapse:collapse;">
+      <tr align="center" bgcolor="white" height="40">
+        <td align="center" width="160">${PRODUCT_NAME_TITLE}</td>
+        <td align="center" width="100">${PRODUCT_PRICE_TITLE}</td>
+        <td align="center" width="100">${PRODUCT_QUANTITY_TITLE}</td>
+      </tr>
+    </table>
+  `;
+  $productAdd.append($listContainer);
+  console.log('test: ', document.querySelector(`#${PRODUCT_LIST_TABLE_ID}`));
+  ...
+}
+```
+위 코드를 보면 `innerHTML` 함수를 이용해서 새로운 `<table>`을 만들어서 새로 생성한 `<div>` 에 `append`해서 화면을 구성한다.
+
+그런데 쉽게 생각했을 때 코드가 순서대로 실행되면서 DOM 노드를 만들어서 조작 과정을 전부 마치고 `console.log()`로 생성된 DOM 노드를 참조해서 출력하는 것이니까 정상적으로 작동할 것처럼 보인다.
+
+하지만 결과는 `test: null` 이 출력된다. 즉, DOM 노드를 생성해서 조작하는 과정을 다 거쳤지만 그 직후 참조를 하려고 하면 해당 노드를 참조할 수 없다.
+
+여기서 신기한 점은 만약에 `setTimeout` 함수를 이용해서 `console.log()` 부분을 지연실행시키면 어떻게 될까?
+
+```js
+function renderProductAddList($productAdd) {
+  const $listContainer = document.createElement('div');
+
+  $listContainer.innerHTML = `
+    <h3>${PRODUCT_LIST_TITLE}</h3>
+    <table id="${PRODUCT_LIST_TABLE_ID}" bgcolor="black" border="1" style="border-collapse:collapse;">
+      ${productListHeaderTemplate()}
+    </table>
+  `;
+  $productAdd.append($listContainer);
+  setTimeout(() => {
+    console.log('test: ', document.querySelector(`#${PRODUCT_LIST_TABLE_ID}`));
+  }, 0);
+  ...
+}
+```
+위 코드에서 변경된 부분은 `console.log()` 부분이 `setTimeout` 함수 안으로 이동한 것 뿐이다. 이렇게 수정한 결과 정상적으로 콘솔에 해당 DOM node를 참조할 수 있었다.
+
+이렇게 되는 이유를 깊이 있게 탐구하지는 못했지만 다음과 같을 것이다.
+
+JS는 코드를 한 줄 한 줄 내려가면서 실행한다. `innerHTML` 함수를 실행하고 `append`함수를 실행한다. 그렇게 정상적으로 DOM node가 생성되었을 것이다. 하지만 그 직후 바로 해당 DOM node를 참조하면 참조할 수가 없다. 아마도 **document.querySelector가 실제로 브라우저에 렌더링된 DOM 노드를 참조하려고 하는데 아직 렌더링과정까지는 완료가 안 됐기 때문**이다.
+
+브라우저는 DOM 을 파싱하고 렌더링하는 일련의 과정을 거치는데 그 과정에 시간이 걸리는 것이다. 그래서 `setTimeout`으로 지연 실행시켰을 때는 정상적으로 작동한 것이다. 
+
+그렇다면 이 문제를 어떤 방식으로 해결해야 할까?
+
+위와 같이 `setTimeout`으로 지연실행시키면 되겠지만 정확히 어떤 식으로 문제가 해결돼서 동작하는지 확신이 없기 때문에 더 안전한 방법을 찾아야 한다.
+
+위의 코드에서 `querySelector`로 DOM 노드를 참조하려는 이유는 `localStorage`에 있는 데이터를 가져와서 있으면 보여주기 위해서였다. 그런데 이 의도를 다른 방법으로 구현하면 문제 해결이 가능했다.
+
+**template literal안에서 map 함수를 통해 배열을 만든 후 `join`함수로 문자열로 만들면 된다.**
+
+```js
+function productListTemplate({ name, price, quantity }) {
+  return `
+    <tr align="center" bgcolor="white" height="40">
+      ...
+    </tr>
+  `;
+}
+
+function renderProductAddList($productAdd) {
+  const $listContainer = document.createElement('div');
+  const products = JSON.parse(localStorage.getItem(PRODUCTS_STORAGE_KEY))
+    ?.map((product) => productListTemplate(product))
+    .join('');
+
+  $listContainer.innerHTML = `
+    <h3>${PRODUCT_LIST_TITLE}</h3>
+    <table id="${PRODUCT_LIST_TABLE_ID}" bgcolor="black" border="1" style="border-collapse:collapse;">
+      ${productListHeaderTemplate()}
+      ${products || ''}
+    </table>
+  `;
+  $productAdd.append($listContainer);
+}
+}
+```
+위 코드를 보면 `localStorage`에서 데이터를 가져와서 하나의 문자열로 만들어 `products`라는 변수에 저장한다.
+그 다음에 그것을 그냥 **template literal 안에 추가**하는 것으로 의도를 정확하게 구현할 수 있었다.
 
 ## 3. Javascript
 
@@ -65,3 +173,4 @@ undefined
 - [클린코드 Javascript](https://github.com/qkraudghgh/clean-code-javascript-ko)
 - [모던 자바스크립트 튜토리얼](https://ko.javascript.info/)
 - [LocalStorage](https://www.daleseo.com/js-web-storage/)
+- [NAVER D2 - 브라우저는 어떻게 동작하는가?](https://d2.naver.com/helloworld/59361)
